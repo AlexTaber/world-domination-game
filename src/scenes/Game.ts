@@ -9,6 +9,7 @@ export class GameScene extends Phaser.Scene {
 
   private inputService?: GameInputService;
   private planets: Planet[] = [];
+  private planetsMarkedForDestruction: Planet[] = [];
 
   constructor() {
     super('GameScene');
@@ -22,12 +23,14 @@ export class GameScene extends Phaser.Scene {
     this.inputService = new GameInputService(this);
     this.setSolarSystem();
     this.setPlayerPlanet();
-    this.setCollider();
+    this.setColliders();
   }
 
   update() {
     this.inputService?.update();
     this.planets.forEach(planet => planet.update());
+    this.handlePlanetsLeftOrbit();
+    this.handleDestroyedPlanets();
   }
 
   private setSolarSystem() {
@@ -37,12 +40,24 @@ export class GameScene extends Phaser.Scene {
   private setPlayerPlanet() {
     this.playerPlanet = this.createPlanet();
     this.playerPlanet.isAI = false;
+
+    this.createPlanet();
+    this.createPlanet();
+    this.createPlanet();
   }
 
   private createPlanet() {
-    const planet = new Planet(this);
+    const planet = new Planet(this, this.getPlanetInitialPosition());
     this.planets.push(planet);
     return planet;
+  }
+
+  private getPlanetInitialPosition() {
+    const dir = this.planets.length * 135;
+    const dis = this.solarSystem.diameter * 0.3;
+    const x = this.solarSystem.sunObject.body.position.x + Math.cos(Phaser.Math.DegToRad(dir)) * dis;
+    const y = this.solarSystem.sunObject.body.position.y + Math.sin(Phaser.Math.DegToRad(dir)) * dis;
+    return new Phaser.Math.Vector2(x, y);
   }
 
   private destroyPlanet(planet: Planet) {
@@ -50,12 +65,27 @@ export class GameScene extends Phaser.Scene {
     planet.destroy();
   }
 
-  private setCollider() {
-    this.physics.add.overlap(this.playerPlanet.object, this.solarSystem.sunObject, this.onCollide, undefined, this);
+  private setColliders() {
+    this.physics.add.overlap(this.planets.map(p => p.object), this.solarSystem.sunObject, this.onSunCollide, undefined, this);
+    this.physics.add.collider(this.planets.map(p => p.object), this.planets.map(p => p.object));
   }
 
-  private onCollide(planetObject: Phaser.GameObjects.GameObject) {
+  private onSunCollide(planetObject: Phaser.GameObjects.GameObject) {
     const planet = planetObject.getData("planet") as Planet;
-    this.destroyPlanet(planet);
+    this.planetsMarkedForDestruction.push(planet);
+    console.log(this.planetsMarkedForDestruction);
+  }
+
+  private handleDestroyedPlanets() {
+    this.planetsMarkedForDestruction.forEach(p => this.destroyPlanet(p));
+    this.planetsMarkedForDestruction = [];
+  }
+
+  private handlePlanetsLeftOrbit() {
+    this.planets.forEach(p => {
+      if (Phaser.Math.Distance.BetweenPoints(p.object.body.position, this.solarSystem.sunObject.body.position) > this.solarSystem.diameter / 2) {
+        this.planetsMarkedForDestruction.push(p);
+      }
+    });
   }
 }
