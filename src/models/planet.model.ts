@@ -15,7 +15,7 @@ export class Planet {
     this.object.body.setCircle(30);
     this.object.setScale(0.6);
     this.object.setData("planet", this);
-    this.object.setBounce(1);
+    this.object.setBounce(1.2);
     this.object.setDrag(200);
   }
 

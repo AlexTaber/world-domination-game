@@ -3,11 +3,11 @@ import Peer, { DataConnection } from "peerjs";
 import { ReplaySubject } from "rxjs";
 import { useGameFactory } from "../factories/game.factory";
 
-type MessageType = "start" | "update" | "gameOver";
+type MessageType = "connection" | "start" | "update" | "gameOver" | "new";
 
 export interface Message {
   type: MessageType;
-  data: any;
+  data?: any;
 }
 
 const peer = new Peer();
@@ -26,8 +26,8 @@ export const usePeer = () => {
   const open = (callback: (id: string) => void) => {
     peer.on("open", callback);
     peer.on("connection", (connection) => {
-      console.log(connection)
       state.connections.push(connection);
+      stream.next({ type: "connection", data: state.connections.length + 1 });
 
       connection.on("data", (message) => stream.next(message));
     });

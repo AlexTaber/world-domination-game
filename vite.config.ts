@@ -2,6 +2,11 @@ import { defineConfig } from 'vite';
 import replace from '@rollup/plugin-replace';
 
 export default defineConfig({
+  server: {
+    hmr: {
+      port: 443,
+    },
+  },
   build: {
     rollupOptions: {
       plugins: [

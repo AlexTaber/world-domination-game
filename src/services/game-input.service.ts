@@ -1,10 +1,13 @@
 import { GameScene } from "../scenes/Game";
+import { usePeer } from "./peer.service";
 
 export class GameInputService {
   private right: Phaser.Input.Keyboard.Key;
   private left: Phaser.Input.Keyboard.Key;
   private up: Phaser.Input.Keyboard.Key;
   private down: Phaser.Input.Keyboard.Key;
+  private enter: Phaser.Input.Keyboard.Key;
+  private peer = usePeer();
 
   constructor(
     private scene: GameScene
@@ -13,6 +16,7 @@ export class GameInputService {
     this.left = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
     this.up = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
     this.down = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+    this.enter = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
   }
 
   public update() {
@@ -41,6 +45,10 @@ export class GameInputService {
       }
 
       if (direction !== undefined) this.scene.playerPlanet.move(direction);
+    }
+
+    if (this.peer.state.isHost && this.enter.isDown && this.scene.winnerId) {
+      this.scene.startNewGame();
     }
   }
 }

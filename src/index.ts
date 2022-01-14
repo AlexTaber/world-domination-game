@@ -1,7 +1,7 @@
 import { useGameFactory } from './factories/game.factory';
 import { usePeer } from './services/peer.service';
 
-const { peer, open, connect, setIsHost } = usePeer();
+const { peer, stream, open, connect, setIsHost } = usePeer();
 
 const { createGame } = useGameFactory();
 
@@ -11,6 +11,13 @@ open((id: string) => {
 
   gameId ? connectToExistingConnection(gameId) : pushGameIdToUrl();
 });
+
+stream.subscribe(message => {
+  if (message.type === "connection") {
+    const el = document.getElementById("connections");
+    if (el) el.innerHTML = `${message.data} Player(s) Ready`;
+  }
+})
 
 const pushGameIdToUrl = () => {
   const newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + `?gameId=${peer.id}`;
@@ -22,8 +29,6 @@ const connectToExistingConnection = (id: string) => {
   connect(id);
 }
 
-document.addEventListener("keyup", (event) => {
-  if (event.key === "Enter") {
-      createGame();
-  }
+document.getElementById("newGame")?.addEventListener("click", (event) => {
+  createGame();
 });
