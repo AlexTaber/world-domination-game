@@ -1,10 +1,10 @@
-import Phaser from 'phaser';
-import { useCanvas } from '../services/canvas.service';
-import { Planet } from '../models/planet.model';
-import { SolarSystem } from '../models/solar-system.model';
-import { GameInputService } from '../services/game-input.service';
-import { usePeer } from '../services/peer.service';
-import { usePublicGameState } from '../services/public-game-state.service';
+import Phaser from "phaser";
+import { useCanvas } from "../services/canvas.service";
+import { Planet } from "../models/planet.model";
+import { SolarSystem } from "../models/solar-system.model";
+import { GameInputService } from "../services/game-input.service";
+import { usePeer } from "../services/peer.service";
+import { usePublicGameState } from "../services/public-game-state.service";
 
 export class GameScene extends Phaser.Scene {
   public solarSystem!: SolarSystem;
@@ -19,7 +19,7 @@ export class GameScene extends Phaser.Scene {
   private planetsMarkedForDestruction: Planet[] = [];
 
   constructor() {
-    super('GameScene');
+    super("GameScene");
   }
 
   public preload() {
@@ -31,6 +31,7 @@ export class GameScene extends Phaser.Scene {
   public create() {
     this.inputService = new GameInputService(this);
     this.setSolarSystem();
+    // creates planets
     this.createPlanetsIfHost();
     this.setColliders();
     this.subscribeToStream();
@@ -40,7 +41,7 @@ export class GameScene extends Phaser.Scene {
   public update() {
     this.inputService?.update();
     if (this.peer.state.isHost) {
-      this.planets.forEach(p => p.update());
+      this.planets.forEach((p) => p.update());
       this.handlePlanetsLeftOrbit();
       this.handleDestroyedPlanets();
     }
@@ -66,17 +67,22 @@ export class GameScene extends Phaser.Scene {
 
   private createPlanetsIfHost() {
     if (this.peer.state.isHost) {
+      // apply name and iamge here
       this.playerPlanet = this.createPlanet(this.peer.peer.id);
-      this.playerPlanet.isPlayer = true;
+      this.playerPlanet.isHost = true;
 
-      this.peer.state.connections.forEach(conn => {
-        this.createPlanet(conn.peer)
-      })
+      this.peer.state.connections.forEach((conn) => {
+        this.createPlanet(conn.peer);
+      });
     }
   }
 
   private createPlanet(id: string) {
-    const planet = new Planet(id, this, this.getPlanetInitialPosition(this.planets.length));
+    const planet = new Planet(
+      id,
+      this,
+      this.getPlanetInitialPosition(this.planets.length)
+    );
     this.planets.push(planet);
     return planet;
   }
@@ -96,8 +102,17 @@ export class GameScene extends Phaser.Scene {
   }
 
   private setColliders() {
-    this.physics.add.overlap(this.planets.map(p => p.object), this.solarSystem.sunObject, this.onSunCollide, undefined, this);
-    this.physics.add.collider(this.planets.map(p => p.object), this.planets.map(p => p.object));
+    this.physics.add.overlap(
+      this.planets.map((p) => p.object),
+      this.solarSystem.sunObject,
+      this.onSunCollide,
+      undefined,
+      this
+    );
+    this.physics.add.collider(
+      this.planets.map((p) => p.object),
+      this.planets.map((p) => p.object)
+    );
   }
 
   private onSunCollide(planetObject: Phaser.GameObjects.GameObject) {
@@ -106,13 +121,20 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handleDestroyedPlanets() {
-    this.planetsMarkedForDestruction.forEach(p => this.destroyPlanet(p));
+    this.planetsMarkedForDestruction.forEach((p) => this.destroyPlanet(p));
     this.planetsMarkedForDestruction = [];
   }
 
   private handlePlanetsLeftOrbit() {
-    this.planets.forEach(p => {
-      if (!p.destroyed && Phaser.Math.Distance.BetweenPoints(p.object.body.position, this.solarSystem.sunObject.body.position) > this.solarSystem.diameter / 2) {
+    this.planets.forEach((p) => {
+      if (
+        !p.destroyed &&
+        Phaser.Math.Distance.BetweenPoints(
+          p.object.body.position,
+          this.solarSystem.sunObject.body.position
+        ) >
+          this.solarSystem.diameter / 2
+      ) {
         this.planetsMarkedForDestruction.push(p);
       }
     });
@@ -135,19 +157,21 @@ export class GameScene extends Phaser.Scene {
   }
 
   private getPayload = () => {
-    return this.peer.state.isHost ? this.getHostPayload() : this.getConnectionPayload();
-  }
+    return this.peer.state.isHost
+      ? this.getHostPayload()
+      : this.getConnectionPayload();
+  };
 
   private getHostPayload = () => {
     return {
-      planets: this.planets.map(p => ({
+      planets: this.planets.map((p) => ({
         id: p.id,
         destroyed: p.destroyed,
         position: { x: p.object.body.position.x, y: p.object.body.position.y },
         velocity: { x: p.object.body.velocity.x, y: p.object.body.velocity.y },
       })),
     };
-  }
+  };
 
   private getConnectionPayload = () => {
     return {
@@ -155,30 +179,33 @@ export class GameScene extends Phaser.Scene {
         {
           id: this.playerPlanet.id,
           inputDirection: this.playerPlanet.inputDirection,
-        }
-      ]
-    }
+        },
+      ],
+    };
   };
 
   private subscribeToStream() {
-    this.peer.stream.subscribe(message => {
-      const map = new Map(Object.entries({
-        start: this.handleStartMessage.bind(this),
-        update: this.handleUpdateMessage.bind(this),
-        gameOver: this.handleGameOverMessage.bind(this),
-        new: this.handleNewGameMessage.bind(this),
-      }));
+    this.peer.stream.subscribe((message) => {
+      const map = new Map(
+        Object.entries({
+          start: this.handleStartMessage.bind(this),
+          update: this.handleUpdateMessage.bind(this),
+          gameOver: this.handleGameOverMessage.bind(this),
+          new: this.handleNewGameMessage.bind(this),
+        })
+      );
 
       map.get(message.type)?.(message.data);
     });
   }
 
   private handleStartMessage(data: any) {
+    // create new planet instance with planet id
     data.planets.forEach((p: any, i: number) => {
       const planet = this.createPlanet(p.id);
       if (planet.id === this.peer.peer.id) {
         this.playerPlanet = planet;
-        planet.isPlayer = true;
+        planet.isHost = true;
       }
     });
     this.handleUpdateMessage(data);
@@ -186,7 +213,9 @@ export class GameScene extends Phaser.Scene {
 
   private handleUpdateMessage(data: any) {
     data.planets.forEach((p: any, i: number) => {
-      const planet = this.planets.find(checkedPlanet => checkedPlanet.id === p.id);
+      const planet = this.planets.find(
+        (checkedPlanet) => checkedPlanet.id === p.id
+      );
 
       if (planet) {
         if (!this.peer.state.isHost) {
@@ -215,7 +244,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handleGameOverIfOnePlanetLeft = () => {
-    const remainingPlanets = this.planets.filter(p => !p.destroyed);
+    const remainingPlanets = this.planets.filter((p) => !p.destroyed);
     if (remainingPlanets.length === 1) {
       this.handleGameOver(remainingPlanets[0]);
     }
@@ -227,7 +256,7 @@ export class GameScene extends Phaser.Scene {
       this.peer.send("gameOver", { winnerId: planet.id });
     }
 
-    this.planets.forEach(p => p.object.setVelocity(0));
+    this.planets.forEach((p) => p.object.setVelocity(0));
   }
 
   private updatePublicGameState() {
