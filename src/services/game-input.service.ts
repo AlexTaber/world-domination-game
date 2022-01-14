@@ -16,7 +16,7 @@ export class GameInputService {
   }
 
   public update() {
-    if (!this.scene.playerPlanet.destroyed) {
+    if (!this.scene.playerPlanet.destroyed && !this.scene.winnerId) {
       let direction = undefined;
       if (this.right?.isDown) {
         if (this.up?.isDown) {

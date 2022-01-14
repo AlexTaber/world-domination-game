@@ -3,7 +3,7 @@ import Peer, { DataConnection } from "peerjs";
 import { ReplaySubject } from "rxjs";
 import { useGameFactory } from "../factories/game.factory";
 
-type MessageType = "start" | "update";
+type MessageType = "start" | "update" | "gameOver";
 
 export interface Message {
   type: MessageType;
@@ -15,6 +15,7 @@ const peer = new Peer();
 let state = {
   isHost: false,
   connections: [] as DataConnection[],
+  connection: undefined as DataConnection | undefined,
 };
 
 const stream = new ReplaySubject<Message>();
@@ -27,12 +28,14 @@ export const usePeer = () => {
     peer.on("connection", (connection) => {
       console.log(connection)
       state.connections.push(connection);
+
+      connection.on("data", (message) => stream.next(message));
     });
   }
 
   const connect = (id: string) => {
-    const conn = peer.connect(id);
-    conn.on("data", (message: Message) => {
+    state.connection = peer.connect(id);
+    state.connection.on("data", (message: Message) => {
       if (message.type === "start") {
         createGame();
       }
@@ -42,13 +45,9 @@ export const usePeer = () => {
 
   const setIsHost = () => state.isHost = true;
 
-  const sendIfHost = (type: MessageType, data: any) => {
-    if (state.isHost) {
-      state.connections.forEach(conn => conn.send({
-        type,
-        data,
-      }));
-    }
+  const send = (type: MessageType, data: any) => {
+    const message = { type, data };
+    state.isHost ? state.connections.forEach(conn => conn.send(message)) : state.connection?.send(message);
   }
 
   return {
@@ -58,6 +57,6 @@ export const usePeer = () => {
     open,
     connect,
     setIsHost,
-    sendIfHost,
+    send,
   };
 };

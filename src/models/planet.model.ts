@@ -19,10 +19,6 @@ export class Planet {
     this.object.setDrag(200);
   }
 
-  public update() {
-    //
-  }
-
   public move(direction: number) {
     this.object.setDrag(0);
     const x = Math.cos(Phaser.Math.DegToRad(direction)) * 700;
@@ -31,8 +27,8 @@ export class Planet {
   }
 
   public destroy() {
-    console.log("DEATH!");
-    this.object.destroy();
     this.destroyed = true;
+    this.object.setPosition(-10000000);
+    this.object.setVelocity(0);
   }
 }
