@@ -4,16 +4,18 @@ import { Planet } from '../models/planet.model';
 import { SolarSystem } from '../models/solar-system.model';
 import { GameInputService } from '../services/game-input.service';
 import { usePeer } from '../services/peer.service';
+import { usePublicGameState } from 'src/services/public-game-state.service';
 
 export class GameScene extends Phaser.Scene {
   public solarSystem!: SolarSystem;
   public playerPlanet!: Planet;
   public winnerId?: string = undefined;
+  public planets: Planet[] = [];
 
   private peer = usePeer();
   private canvas = useCanvas();
+  private publicGameState = usePublicGameState();
   private inputService?: GameInputService;
-  private planets: Planet[] = [];
   private planetsMarkedForDestruction: Planet[] = [];
 
   constructor() {
@@ -43,6 +45,7 @@ export class GameScene extends Phaser.Scene {
       this.handleDestroyedPlanets();
     }
     this.sendUpdate();
+    this.updatePublicGameState();
   }
 
   public startNewGame() {
@@ -225,5 +228,9 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.planets.forEach(p => p.object.setVelocity(0));
+  }
+
+  private updatePublicGameState() {
+    this.publicGameState.updateFromGame(this);
   }
 }

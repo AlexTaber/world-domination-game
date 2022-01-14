@@ -5,6 +5,7 @@ export class Planet {
   public object: Phaser.Physics.Arcade.Sprite;
   public destroyed = false;
   public inputDirection?: number = undefined;
+  public name = "apples";
 
   constructor(
     public id: string,
