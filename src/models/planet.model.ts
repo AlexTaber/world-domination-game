@@ -17,6 +17,7 @@ export class Planet {
     this.object.setData("planet", this);
     this.object.setBounce(1.2);
     this.object.setDrag(200);
+    this.setPosition(this.position.x, this.position.y);
   }
 
   public move(direction: number) {
@@ -26,9 +27,14 @@ export class Planet {
     this.object.body.velocity.lerp(new Phaser.Math.Vector2(x, y), 0.035);
   }
 
+  public setPosition(x: number, y: number) {
+    this.object.setPosition(x + (this.object.body.width / 2), y + (this.object.body.height / 2));
+  }
+
   public destroy() {
     this.destroyed = true;
     this.object.setPosition(-10000000);
     this.object.setVelocity(0);
+    console.log("DEATH");
   }
 }

@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { useCanvas } from '../services/canvas.service';
 import { Planet } from '../models/planet.model';
 import { SolarSystem } from '../models/solar-system.model';
 import { GameInputService } from '../services/game-input.service';
@@ -10,6 +11,7 @@ export class GameScene extends Phaser.Scene {
   public winnerId?: string = undefined;
 
   private peer = usePeer();
+  private canvas = useCanvas();
   private inputService?: GameInputService;
   private planets: Planet[] = [];
   private planetsMarkedForDestruction: Planet[] = [];
@@ -19,7 +21,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   public preload() {
-    this.load.image("planet1", "assets/planet-1.png");
+    this.load.image("planet1", "../assets/planet-1.png");
+    this.load.image("sun", "../assets/sun.png");
   }
 
   public create() {
@@ -76,8 +79,9 @@ export class GameScene extends Phaser.Scene {
   private getPlanetInitialPosition(index: number) {
     const dir = index * 135;
     const dis = this.solarSystem.diameter * 0.3;
-    const x = this.solarSystem.sunObject.body.position.x + Math.cos(Phaser.Math.DegToRad(dir)) * dis;
-    const y = this.solarSystem.sunObject.body.position.y + Math.sin(Phaser.Math.DegToRad(dir)) * dis;
+    const center = this.canvas.getCenter();
+    const x = center.x + Math.cos(Phaser.Math.DegToRad(dir)) * dis;
+    const y = center.y + Math.sin(Phaser.Math.DegToRad(dir)) * dis;
     return new Phaser.Math.Vector2(x, y);
   }
 
@@ -103,7 +107,7 @@ export class GameScene extends Phaser.Scene {
 
   private handlePlanetsLeftOrbit() {
     this.planets.forEach(p => {
-      if (Phaser.Math.Distance.BetweenPoints(p.object.body.position, this.solarSystem.sunObject.body.position) > this.solarSystem.diameter / 2) {
+      if (!p.destroyed && Phaser.Math.Distance.BetweenPoints(p.object.body.position, this.solarSystem.sunObject.body.position) > this.solarSystem.diameter / 2) {
         this.planetsMarkedForDestruction.push(p);
       }
     });
@@ -181,7 +185,7 @@ export class GameScene extends Phaser.Scene {
 
       if (planet) {
         if (!this.peer.state.isHost) {
-          planet.object.setPosition(p.position.x + (planet.object.body.width / 2), p.position.y + (planet.object.body.height / 2));
+          planet.setPosition(p.position.x, p.position.y);
 
           if (p.destroyed && !planet.destroyed) {
             this.destroyPlanet(planet!);

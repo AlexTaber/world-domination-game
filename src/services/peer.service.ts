@@ -1,7 +1,6 @@
 import Peer, { DataConnection } from "peerjs";
 
 import { ReplaySubject } from "rxjs";
-import { useGameFactory } from "../factories/game.factory";
 
 type MessageType = "connection" | "start" | "update" | "gameOver" | "new";
 
@@ -21,8 +20,6 @@ let state = {
 const stream = new ReplaySubject<Message>();
 
 export const usePeer = () => {
-  const { createGame } = useGameFactory();
-
   const open = (callback: (id: string) => void) => {
     peer.on("open", callback);
     peer.on("connection", (connection) => {
@@ -36,9 +33,6 @@ export const usePeer = () => {
   const connect = (id: string) => {
     state.connection = peer.connect(id);
     state.connection.on("data", (message: Message) => {
-      if (message.type === "start") {
-        createGame();
-      }
       stream.next(message);
     });
   };
@@ -50,6 +44,11 @@ export const usePeer = () => {
     state.isHost ? state.connections.forEach(conn => conn.send(message)) : state.connection?.send(message);
   }
 
+  const clearConnections = () => {
+    state.connections.forEach(conn => conn.close());
+    state.connections = [];
+  }
+
   return {
     peer,
     stream,
@@ -58,5 +57,6 @@ export const usePeer = () => {
     connect,
     setIsHost,
     send,
+    clearConnections,
   };
 };

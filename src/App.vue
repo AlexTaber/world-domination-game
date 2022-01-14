@@ -1,10 +1,21 @@
 <template>
   <div id="nav">
     <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+    <router-link to="/games/new">New Game</router-link>
   </div>
-  <router-view/>
+  <router-view v-if="peerId" />
 </template>
+
+<script setup lang="ts">
+import { Ref, ref } from "vue";
+import { usePeer } from "./services/peer.service";
+
+const { open } = usePeer();
+
+const peerId = ref(undefined) as Ref<string | undefined>;
+
+open((id: string) => peerId.value = id);
+</script>
 
 <style>
 #app {
