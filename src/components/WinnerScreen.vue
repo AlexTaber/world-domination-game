@@ -4,7 +4,7 @@
     <img class="rotate" src="../../public/assets/planet-1.png" />
   </div>
   <h1 id="congratsMessage">CONGRATS</h1>
-  <h1>{{ winner }}!</h1>
+  <h1>{{ winner.name }}!</h1>
 </template>
 
 <script setup lang="ts">
