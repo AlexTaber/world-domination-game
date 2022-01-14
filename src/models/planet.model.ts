@@ -1,13 +1,10 @@
 import { GameScene } from "../scenes/Game";
-import { useCanvas } from "../services/canvas.service"
 
 export class Planet {
-  public isAI = true;;
+  public id = Math.random() * 10000000;
+  public isPlayer = false;
   public object: Phaser.Physics.Arcade.Sprite;
   public destroyed = false;
-
-  private canvas = useCanvas();
-  private diameter = this.canvas.getPercentageHeight(4);
 
   constructor(
     private scene: GameScene,
@@ -23,9 +20,7 @@ export class Planet {
   }
 
   public update() {
-    if (this.isAI) {
-
-    }
+    //
   }
 
   public move(direction: number) {
@@ -39,12 +34,5 @@ export class Planet {
     console.log("DEATH!");
     this.object.destroy();
     this.destroyed = true;
-  }
-
-  private getStartingPostion() {
-    return {
-      x: Phaser.Math.Between(this.canvas.getPercentageHeight(8), this.canvas.getPercentageHeight(50)),
-      y: Phaser.Math.Between(this.canvas.getPercentageHeight(8), this.canvas.getPercentageHeight(50))
-    }
   }
 }

@@ -1,9 +1,9 @@
-import Phaser from 'phaser';
-import { config } from './config';
-import { GameScene } from './scenes/Game';
+import { useGameFactory } from './factories/game.factory';
 import { usePeer } from './services/peer.service';
 
 const { peer, open, connect, setIsHost } = usePeer();
+
+const { createGame } = useGameFactory();
 
 open((id: string) => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -27,11 +27,3 @@ document.addEventListener("keyup", (event) => {
       createGame();
   }
 });
-
-const createGame = () => {
-  new Phaser.Game(
-    Object.assign(config, {
-      scene: [GameScene]
-    })
-  );
-}

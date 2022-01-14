@@ -26,6 +26,8 @@ export class GameScene extends Phaser.Scene {
     this.setSolarSystem();
     this.setPlayerPlanet();
     this.setColliders();
+    this.subscribeToStream();
+    this.sendStart();
   }
 
   update() {
@@ -33,7 +35,7 @@ export class GameScene extends Phaser.Scene {
     this.planets.forEach(planet => planet.update());
     this.handlePlanetsLeftOrbit();
     this.handleDestroyedPlanets();
-    this.sendState();
+    this.sendUpdate();
   }
 
   private setSolarSystem() {
@@ -42,7 +44,7 @@ export class GameScene extends Phaser.Scene {
 
   private setPlayerPlanet() {
     this.playerPlanet = this.createPlanet();
-    this.playerPlanet.isAI = false;
+    this.playerPlanet.isPlayer = true;
 
     this.createPlanet();
     this.createPlanet();
@@ -91,11 +93,48 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  private sendState() {
-    this.peer.sendIfHost({
+  private sendStart() {
+    this.peer.sendIfHost("start", this.getPayload());
+  }
+
+  private sendUpdate() {
+    this.peer.sendIfHost("update", this.getPayload());
+  }
+
+  private getPayload = () => {
+    return {
       planets: this.planets.map(p => ({
+        id: p.id,
+        position: { x: p.object.body.position.x, y: p.object.body.position.y },
         velocity: { x: p.object.body.velocity.x, y: p.object.body.velocity.y },
       })),
+    };
+  }
+
+  private subscribeToStream() {
+    this.peer.stream.subscribe(message => {
+      const map = new Map(Object.entries({
+        start: this.handleStartMessage.bind(this),
+        update: this.handleUpdateMessage.bind(this),
+      }));
+
+      map.get(message.type)?.(message.data);
+    });
+  }
+
+  private handleStartMessage(data: any) {
+    data.planets.forEach((p: any, i: number) => {
+      const planet = this.planets[i];
+      planet.id = p.id;
+    });
+    this.handleUpdateMessage(data);
+  }
+
+  private handleUpdateMessage(data: any) {
+    data.planets.forEach((p: any, i: number) => {
+      const planet = this.planets.find(checkedPlanet => checkedPlanet.id === p.id);
+      planet?.object.setPosition(p.position.x, p.position.y);
+      planet?.object.setVelocity(p.velocity.x, p.velocity.y);
     });
   }
 }
