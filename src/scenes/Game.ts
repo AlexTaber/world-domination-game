@@ -1,17 +1,19 @@
-import Phaser from "phaser";
-import { useCanvas } from "../services/canvas.service";
-import { Planet } from "../models/planet.model";
-import { SolarSystem } from "../models/solar-system.model";
-import { GameInputService } from "../services/game-input.service";
-import { usePeer } from "../services/peer.service";
-import { usePublicGameState } from "../services/public-game-state.service";
 import { usePlayerFormState } from "../services/player-form.service";
+import Phaser from 'phaser';
+import { useCanvas } from '../services/canvas.service';
+import { Planet } from '../models/planet.model';
+import { SolarSystem } from '../models/solar-system.model';
+import { Asteroid } from '../models/asteroid.model';
+import { GameInputService } from '../services/game-input.service';
+import { usePeer } from '../services/peer.service';
+import { usePublicGameState } from '../services/public-game-state.service';
 
 export class GameScene extends Phaser.Scene {
   public solarSystem!: SolarSystem;
   public playerPlanet!: Planet;
   public winnerId?: string = undefined;
   public planets: Planet[] = [];
+  public astroids: Asteroid[] = [];
 
   private peer = usePeer();
   private canvas = useCanvas();
@@ -28,6 +30,7 @@ export class GameScene extends Phaser.Scene {
     this.load.image("planet1", "../assets/planet-1.png");
     this.load.image("sun", "../assets/sun.png");
     this.load.image("background", "../assets/background.jpg");
+    this.load.image('asteroid', "/assets/asteroid.png")
   }
 
   public create() {
@@ -35,6 +38,7 @@ export class GameScene extends Phaser.Scene {
     this.setSolarSystem();
     // creates planets
     this.createPlanetsIfHost();
+    this.createAsteroids();
     this.setColliders();
     this.subscribeToStream();
     this.sendStartIfHost();
@@ -93,6 +97,15 @@ export class GameScene extends Phaser.Scene {
     return planet;
   }
 
+  private createAsteroids() {
+    const numberOfAsteriods = Math.floor((Math.random() * 4) + 1); // random number between 1-3
+
+    for (let x = 0; x < numberOfAsteriods ; x++) {
+      const astroid = new Asteroid(this,this.getPlanetInitialPosition(this.planets.length+numberOfAsteriods + x))
+      this.astroids.push(astroid)
+    }
+  }
+
   private getPlanetInitialPosition(index: number) {
     const dir = index * 135;
     const dis = this.solarSystem.diameter * 0.3;
@@ -108,17 +121,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   private setColliders() {
-    this.physics.add.overlap(
-      this.planets.map((p) => p.object),
-      this.solarSystem.sunObject,
-      this.onSunCollide,
-      undefined,
-      this
-    );
-    this.physics.add.collider(
-      this.planets.map((p) => p.object),
-      this.planets.map((p) => p.object)
-    );
+    this.physics.add.overlap(this.planets.map(p => p.object), this.solarSystem.sunObject, this.onSunCollide, undefined, this);
+    this.physics.add.collider(this.planets.map(p => p.object), this.planets.map(p => p.object));
+    this.physics.add.collider(this.planets.map(p => p.object), this.astroids.map(a => a.asteroid));
   }
 
   private onSunCollide(planetObject: Phaser.GameObjects.GameObject) {
