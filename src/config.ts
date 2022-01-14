@@ -12,8 +12,8 @@ export const config = {
     }
   },
   scale: {
-    width: 800,
-    height: 600,
+    width: 920,
+    height: 700,
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
   }

@@ -47,6 +47,7 @@ export const usePeer = () => {
   const clearConnections = () => {
     state.connections.forEach(conn => conn.close());
     state.connections = [];
+    stream.next({ type: "connection", data: state.connections.length + 1 });
   }
 
   return {

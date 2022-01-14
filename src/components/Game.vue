@@ -3,10 +3,14 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, onUnmounted } from "vue";
 import { useGameFactory } from "../factories/game.factory";
 
 const { createGame } = useGameFactory();
 
-onMounted(() => createGame());
+let game: Phaser.Game | undefined = undefined;
+
+onMounted(() => game = createGame());
+
+onUnmounted(() => game?.destroy(true, false));
 </script>

@@ -27,8 +27,8 @@ export class Planet {
 
   public move(direction: number) {
     this.object.setDrag(0);
-    const x = Math.cos(Phaser.Math.DegToRad(direction)) * 700;
-    const y = Math.sin(Phaser.Math.DegToRad(direction)) * 700;
+    const x = Math.cos(Phaser.Math.DegToRad(direction)) * 800;
+    const y = Math.sin(Phaser.Math.DegToRad(direction)) * 800;
     this.object.body.velocity.lerp(new Phaser.Math.Vector2(x, y), 0.035);
   }
 
