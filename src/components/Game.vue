@@ -1,7 +1,12 @@
 <template>
   <div class="gameContainer">
     <div class="leaderBoard">
-      <div class="player" v-for="planet in state.planets" :key="planet.id">
+      <div
+        class="player"
+        v-for="planet in state.planets"
+        :key="planet.id"
+        :class="{ destroyed: planet.destroyed }"
+      >
         <p>{{ planet.name }}</p>
       </div>
     </div>
@@ -30,17 +35,25 @@ onUnmounted(() => game?.destroy(true, false));
   display: flex;
   justify-content: center;
 }
+
 .leaderBoard {
   display: flex;
   flex-direction: column;
   margin-right: 16px;
   padding-top: 5px;
 }
+
 .player {
   border: 1px solid black;
   padding: 4px 8px;
+  min-width: 200px;
 }
+
 .player + .player {
   margin-top: 8px;
+}
+
+.destroyed {
+  background-color: red;
 }
 </style>
