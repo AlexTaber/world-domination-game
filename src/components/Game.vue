@@ -8,6 +8,7 @@
         :class="{ destroyed: planet.destroyed }"
       >
         <p>{{ planet.name }}</p>
+        <p class="skull">&#128128;</p>
       </div>
     </div>
     <div id="game" />
@@ -39,21 +40,36 @@ onUnmounted(() => game?.destroy(true, false));
 .leaderBoard {
   display: flex;
   flex-direction: column;
-  margin-right: 16px;
+  margin-right: 32px;
   padding-top: 5px;
 }
 
 .player {
-  border: 1px solid black;
+  border-left: 5px solid green;
   padding: 4px 8px;
-  min-width: 200px;
+  min-width: 150px;
+  position: relative;
+  background-color: rgba(0, 128, 0, 0.1);
 }
 
 .player + .player {
-  margin-top: 8px;
+  margin-top: 16px;
 }
 
 .destroyed {
-  background-color: red;
+  border-left: 5px solid red;
+  background-color: rgba(240, 52, 52, 0.1);
+}
+
+.skull {
+  visibility: hidden;
+  position: absolute;
+  font-size: 30px;
+  top: -30%;
+  left: -30%;
+}
+
+.player.destroyed .skull {
+  visibility: visible;
 }
 </style>
