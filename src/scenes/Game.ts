@@ -20,8 +20,6 @@ export class GameScene extends Phaser.Scene {
   private inputService?: GameInputService;
   private planetsMarkedForDestruction: Planet[] = [];
 
-  private shrinkTimer!: Phaser.Time.TimerEvent;
-
   constructor() {
     super("GameScene");
   }
@@ -40,7 +38,6 @@ export class GameScene extends Phaser.Scene {
     this.setColliders();
     this.subscribeToStream();
     this.sendStartIfHost();
-    this.setupShrinkTimer();
   }
 
   public update() {
@@ -65,30 +62,11 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.sendNewIfHost();
-    this.shrinkTimer.reset({
-      callback: this.shrinkSolarSystem,
-      callbackScope: this,
-      delay: 6*1000, // 1000 = 1 second
-      loop: true
-    });
     this.solarSystem.reset();
   }
 
   private setSolarSystem() {
     this.solarSystem = new SolarSystem(this);
-  }
-
-  private setupShrinkTimer() {
-    this.shrinkTimer = this.time.addEvent({
-      callback: this.shrinkSolarSystem,
-      callbackScope: this,
-      delay: 6*1000, // 1000 = 1 second
-      loop: true
-    });
-  }
-
-  private shrinkSolarSystem() {
-    this.solarSystem.shrink(0.70)
   }
 
   private createPlanetsIfHost() {
