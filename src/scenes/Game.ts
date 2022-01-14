@@ -2,11 +2,13 @@ import Phaser from 'phaser';
 import { Planet } from '../models/planet.model';
 import { SolarSystem } from '../models/solar-system.model';
 import { GameInputService } from '../services/game-input.service';
+import { usePeer } from '../services/peer.service';
 
 export class GameScene extends Phaser.Scene {
   public solarSystem!: SolarSystem;
   public playerPlanet!: Planet;
 
+  private peer = usePeer();
   private inputService?: GameInputService;
   private planets: Planet[] = [];
   private planetsMarkedForDestruction: Planet[] = [];
@@ -31,6 +33,7 @@ export class GameScene extends Phaser.Scene {
     this.planets.forEach(planet => planet.update());
     this.handlePlanetsLeftOrbit();
     this.handleDestroyedPlanets();
+    this.sendState();
   }
 
   private setSolarSystem() {
@@ -73,7 +76,6 @@ export class GameScene extends Phaser.Scene {
   private onSunCollide(planetObject: Phaser.GameObjects.GameObject) {
     const planet = planetObject.getData("planet") as Planet;
     this.planetsMarkedForDestruction.push(planet);
-    console.log(this.planetsMarkedForDestruction);
   }
 
   private handleDestroyedPlanets() {
@@ -86,6 +88,14 @@ export class GameScene extends Phaser.Scene {
       if (Phaser.Math.Distance.BetweenPoints(p.object.body.position, this.solarSystem.sunObject.body.position) > this.solarSystem.diameter / 2) {
         this.planetsMarkedForDestruction.push(p);
       }
+    });
+  }
+
+  private sendState() {
+    this.peer.sendIfHost({
+      planets: this.planets.map(p => ({
+        velocity: { x: p.object.body.velocity.x, y: p.object.body.velocity.y },
+      })),
     });
   }
 }
