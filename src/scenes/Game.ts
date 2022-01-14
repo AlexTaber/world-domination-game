@@ -29,7 +29,7 @@ export class GameScene extends Phaser.Scene {
   public create() {
     this.inputService = new GameInputService(this);
     this.setSolarSystem();
-    this.createPlanets();
+    this.createPlanetsIfHost();
     this.setColliders();
     this.subscribeToStream();
     this.sendStartIfHost();
@@ -38,6 +38,7 @@ export class GameScene extends Phaser.Scene {
   public update() {
     this.inputService?.update();
     if (this.peer.state.isHost) {
+      this.planets.forEach(p => p.update());
       this.handlePlanetsLeftOrbit();
       this.handleDestroyedPlanets();
     }
@@ -60,7 +61,7 @@ export class GameScene extends Phaser.Scene {
     this.solarSystem = new SolarSystem(this);
   }
 
-  private createPlanets() {
+  private createPlanetsIfHost() {
     if (this.peer.state.isHost) {
       this.playerPlanet = this.createPlanet(this.peer.peer.id);
       this.playerPlanet.isPlayer = true;
@@ -150,7 +151,7 @@ export class GameScene extends Phaser.Scene {
       planets: [
         {
           id: this.playerPlanet.id,
-          velocity: { x: this.playerPlanet.object.body.velocity.x, y: this.playerPlanet.object.body.velocity.y },
+          inputDirection: this.playerPlanet.inputDirection,
         }
       ]
     }
@@ -187,15 +188,16 @@ export class GameScene extends Phaser.Scene {
       if (planet) {
         if (!this.peer.state.isHost) {
           planet.setPosition(p.position.x, p.position.y);
+          planet.object.setVelocity(p.velocity.x, p.velocity.y);
 
           if (p.destroyed && !planet.destroyed) {
             this.destroyPlanet(planet!);
           } else if (planet.destroyed && !p.destroyed) {
             planet.destroyed = p.destroyed;
           }
+        } else {
+          planet.inputDirection = p.inputDirection;
         }
-
-        planet?.object.setVelocity(p.velocity.x, p.velocity.y);
       }
     });
   }

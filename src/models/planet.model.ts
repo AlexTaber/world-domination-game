@@ -4,6 +4,7 @@ export class Planet {
   public isPlayer = false;
   public object: Phaser.Physics.Arcade.Sprite;
   public destroyed = false;
+  public inputDirection?: number = undefined;
 
   constructor(
     public id: string,
@@ -18,6 +19,10 @@ export class Planet {
     this.object.setBounce(1.2);
     this.object.setDrag(200);
     this.setPosition(this.position.x, this.position.y);
+  }
+
+  public update() {
+    if (this.inputDirection != undefined && !this.destroyed) this.move(this.inputDirection);
   }
 
   public move(direction: number) {

@@ -20,8 +20,13 @@ export class GameInputService {
   }
 
   public update() {
+    this.handleMovementInput();
+    this.handleStartNewGameInput();
+  }
+
+  private handleMovementInput() {
+    let direction = undefined;
     if (!this.scene.playerPlanet.destroyed && !this.scene.winnerId) {
-      let direction = undefined;
       if (this.right?.isDown) {
         if (this.up?.isDown) {
           direction = 315;
@@ -43,10 +48,12 @@ export class GameInputService {
       } else if (this.down?.isDown) {
         direction = 90;
       }
-
-      if (direction !== undefined) this.scene.playerPlanet.move(direction);
     }
 
+    this.scene.playerPlanet.inputDirection = direction;
+  }
+
+  private handleStartNewGameInput() {
     if (this.peer.state.isHost && this.enter.isDown && this.scene.winnerId) {
       this.scene.startNewGame();
     }
