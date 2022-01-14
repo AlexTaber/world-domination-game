@@ -11,9 +11,9 @@ interface PublicPlanet {
   name: string;
 }
 
-export const usePublicGameState = () => {
-  const state = ref({}) as Ref<PublicGameState>;
+const state = ref({}) as Ref<PublicGameState>;
 
+export const usePublicGameState = () => {
   const updateFromGame = (game: GameScene) => {
     const publicPlanets =  game.planets.map(p => ({id: p.id, name: p.name }));
     update({
