@@ -6,13 +6,15 @@ interface PublicGameState {
   winner?: PublicPlanet;
 }
 
-interface PublicPlanet {
+export interface PublicPlanet {
   id: string;
   name: string;
   image?: string;
 }
 
-const state = ref({}) as Ref<PublicGameState>;
+const state = ref({
+  planets: [],
+}) as Ref<PublicGameState>;
 
 export const usePublicGameState = () => {
   const updateFromGame = (game: GameScene) => {
