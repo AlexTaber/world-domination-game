@@ -123,7 +123,7 @@ export class GameScene extends Phaser.Scene {
   private setColliders() {
     this.physics.add.overlap(this.planets.map(p => p.object), this.solarSystem.sunObject, this.onSunCollide, undefined, this);
     this.physics.add.collider(this.planets.map(p => p.object), this.planets.map(p => p.object));
-    this.physics.add.collider(this.planets.map(p => p.object), this.astroids.map(a => a.asteroid));
+   // this.physics.add.collider(this.planets.map(p => p.object), this.astroids.map(a => a.asteroid));
   }
 
   private onSunCollide(planetObject: Phaser.GameObjects.GameObject) {
