@@ -31,8 +31,9 @@ export class SolarSystem {
     this.shrinkTimerConfig = {
       callback: this.shrink,
       callbackScope: this,
-      delay: 6*1000, // 1000 = 1 second
-      loop: true
+      delay: 700,  // ms
+      loop: true,
+      startAt: -9 * 1000  // negative value for startup delay (ms)
     };
     this.shrinkTimer = this.scene.time.addEvent(this.shrinkTimerConfig);
   }
@@ -48,7 +49,7 @@ export class SolarSystem {
     this.shrinkTimer.reset(this.shrinkTimerConfig);
   }
 
-  private shrink(ratio: number = 0.5) {
+  private shrink(ratio: number = 0.99) {
     if (this.diameter > this.sunObject.body.width) {
       this.diameter *= ratio;
       this.orbitSpace.setRadius(this.radius);
