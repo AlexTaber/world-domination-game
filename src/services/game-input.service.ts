@@ -54,7 +54,7 @@ export class GameInputService {
   }
 
   private handleStartNewGameInput() {
-    if (this.peer.state.isHost && this.enter.isDown /*&& this.scene.winnerId*/) {
+    if (this.peer.state.isHost && this.enter.isDown) {
       this.scene.startNewGame();
     }
   }
