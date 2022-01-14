@@ -12,18 +12,28 @@
         <p class="wasted">WASTED</p>
       </div>
     </div>
-    <div id="game" />
+
+    <div class="gameWrapper">
+      <div class="gameOver">
+        <WinnerScreen v-if="winner" :winner="winner" />
+      </div>
+
+      <div id="game" />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, computed } from "vue";
 import { useGameFactory } from "../factories/game.factory";
+import WinnerScreen from "./WinnerScreen.vue";
 import { usePublicGameState } from "../services/public-game-state.service";
 
-const { createGame } = useGameFactory();
-
 const { state } = usePublicGameState();
+
+const winner = computed(() => state.value.winner);
+
+const { createGame } = useGameFactory();
 
 let game: Phaser.Game | undefined = undefined;
 
