@@ -10,7 +10,14 @@
         <p>{{ planet.name }}</p>
       </div>
     </div>
-    <div id="game" />
+
+    <div class="gameWrapper">
+      <div class="gameOver">
+        <WinnerScreen v-if="winner" :winner="winner" />
+      </div>
+
+      <div id="game" />
+    </div>
   </div>
 </template>
 
@@ -58,5 +65,17 @@ onUnmounted(() => game?.destroy(true, false));
 
 .destroyed {
   background-color: red;
+}
+
+.gameWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.gameOver {
+  position: absolute;
+  width: 100%;
+  height: 100%;
 }
 </style>

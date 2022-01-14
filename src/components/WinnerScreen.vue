@@ -1,10 +1,6 @@
 <template>
-  <div class="images">
-    <img class="rotate" src="../../public/assets/asteroid.png" />
-    <img class="rotate" src="../../public/assets/planet-1.png" />
-  </div>
   <h1 id="congratsMessage">CONGRATS</h1>
-  <h1>{{ winner.name }}!</h1>
+  <h1 class="winnerName">{{ winner.name }}!</h1>
 </template>
 
 <script setup lang="ts">
@@ -17,7 +13,7 @@ const props = defineProps<{
 
 const winner = props.winner;
 </script>
-<style>
+<style scoped>
 #congratsMessage {
   color: Orange;
   font-size: 50px;
@@ -36,6 +32,7 @@ const winner = props.winner;
   }
 }
 
-.images {
+.winnerName {
+  color: white
 }
 </style>
