@@ -23,6 +23,7 @@ export class GameScene extends Phaser.Scene {
   public preload() {
     this.load.image("planet1", "../assets/planet-1.png");
     this.load.image("sun", "../assets/sun.png");
+    this.load.image("background", "../assets/background.jpg");
   }
 
   public create() {
