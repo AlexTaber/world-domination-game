@@ -5,16 +5,16 @@ export class Planet {
   public object: Phaser.Physics.Arcade.Sprite;
   public destroyed = false;
   public inputDirection?: number = undefined;
-  // public name = "apples";
+  public name = "apples";
   public image = "bananas";
+
+  private nameLabel: Phaser.GameObjects.Text;
 
   constructor(
     public id: string,
-    public name: string,
     private scene: GameScene,
     private position: Phaser.Math.Vector2
   ) {
-    this.name = name;
     this.object = this.scene.physics.add.sprite(
       this.position.x,
       this.position.y,
@@ -27,11 +27,22 @@ export class Planet {
     this.object.setBounce(1.2);
     this.object.setDrag(200);
     this.setPosition(this.position.x, this.position.y);
+
+    this.nameLabel = this.scene.add.text(position.x, position.y, this.name);
+  }
+
+  public setName(name: string) {
+    this.name = name;
+    this.nameLabel.text = name;
   }
 
   public update() {
     if (this.inputDirection != undefined && !this.destroyed)
       this.move(this.inputDirection);
+  }
+
+  public updateNamePosition() {
+    this.nameLabel.setPosition(this.object.body.position.x, this.object.body.position.y - 20);
   }
 
   public move(direction: number) {
@@ -54,4 +65,6 @@ export class Planet {
     this.object.setVelocity(0);
     console.log("DEATH");
   }
+
+
 }

@@ -42,8 +42,9 @@ export class GameScene extends Phaser.Scene {
 
   public update() {
     this.inputService?.update();
+    this.updatePlanets();
+
     if (this.peer.state.isHost) {
-      this.planets.forEach((p) => p.update());
       this.handlePlanetsLeftOrbit();
       this.handleDestroyedPlanets();
     }
@@ -69,26 +70,21 @@ export class GameScene extends Phaser.Scene {
 
   private createPlanetsIfHost() {
     if (this.peer.state.isHost) {
-      // apply name and iamge here
-      this.playerPlanet = this.createPlanet(
-        this.peer.peer.id,
-        this.playerFormStoreState.state.value.name
-      );
+      this.playerPlanet = this.createPlanet(this.peer.peer.id);
+      this.playerPlanet.setName(this.playerFormStoreState.state.value.name);
       this.playerPlanet.isHost = true;
 
       this.peer.state.connections.forEach((conn) => {
         this.createPlanet(
           conn.peer,
-          this.playerFormStoreState.state.value.name
         );
       });
     }
   }
 
-  private createPlanet(id: string, name: string) {
+  private createPlanet(id: string) {
     const planet = new Planet(
       id,
-      name,
       this,
       this.getPlanetInitialPosition(this.planets.length)
     );
@@ -127,6 +123,16 @@ export class GameScene extends Phaser.Scene {
   private onSunCollide(planetObject: Phaser.GameObjects.GameObject) {
     const planet = planetObject.getData("planet") as Planet;
     this.planetsMarkedForDestruction.push(planet);
+  }
+
+  private updatePlanets() {
+    this.planets.forEach((p) => {
+      if (this.peer.state.isHost) {
+        p.update();
+      }
+
+      p.updateNamePosition();
+    });
   }
 
   private handleDestroyedPlanets() {
@@ -213,9 +219,10 @@ export class GameScene extends Phaser.Scene {
   private handleStartMessage(data: any) {
     // create new planet instance with planet id
     data.planets.forEach((p: any, i: number) => {
-      const planet = this.createPlanet(p.id, p.name);
+      const planet = this.createPlanet(p.id);
       if (planet.id === this.peer.peer.id) {
         this.playerPlanet = planet;
+        this.playerPlanet.setName(this.playerFormStoreState.state.value.name);
         planet.isHost = true;
       }
     });
@@ -233,6 +240,10 @@ export class GameScene extends Phaser.Scene {
           planet.setPosition(p.position.x, p.position.y);
           planet.object.setVelocity(p.velocity.x, p.velocity.y);
 
+          if (planet.id !== this.playerPlanet.id) {
+            planet.setName(p.name);
+          }
+
           if (p.destroyed && !planet.destroyed) {
             this.destroyPlanet(planet!);
           } else if (planet.destroyed && !p.destroyed) {
@@ -240,6 +251,7 @@ export class GameScene extends Phaser.Scene {
           }
         } else {
           planet.inputDirection = p.inputDirection;
+          planet.setName(p.name);
         }
       }
     });
