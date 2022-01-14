@@ -5,6 +5,7 @@ import { SolarSystem } from "../models/solar-system.model";
 import { GameInputService } from "../services/game-input.service";
 import { usePeer } from "../services/peer.service";
 import { usePublicGameState } from "../services/public-game-state.service";
+import { usePlayerFormState } from "../services/player-form.service";
 
 export class GameScene extends Phaser.Scene {
   public solarSystem!: SolarSystem;
@@ -15,6 +16,7 @@ export class GameScene extends Phaser.Scene {
   private peer = usePeer();
   private canvas = useCanvas();
   private publicGameState = usePublicGameState();
+  private playerFormStoreState = usePlayerFormState();
   private inputService?: GameInputService;
   private planetsMarkedForDestruction: Planet[] = [];
 
@@ -68,18 +70,25 @@ export class GameScene extends Phaser.Scene {
   private createPlanetsIfHost() {
     if (this.peer.state.isHost) {
       // apply name and iamge here
-      this.playerPlanet = this.createPlanet(this.peer.peer.id);
+      this.playerPlanet = this.createPlanet(
+        this.peer.peer.id,
+        this.playerFormStoreState.state.value.name
+      );
       this.playerPlanet.isHost = true;
 
       this.peer.state.connections.forEach((conn) => {
-        this.createPlanet(conn.peer);
+        this.createPlanet(
+          conn.peer,
+          this.playerFormStoreState.state.value.name
+        );
       });
     }
   }
 
-  private createPlanet(id: string) {
+  private createPlanet(id: string, name: string) {
     const planet = new Planet(
       id,
+      name,
       this,
       this.getPlanetInitialPosition(this.planets.length)
     );
@@ -166,6 +175,7 @@ export class GameScene extends Phaser.Scene {
     return {
       planets: this.planets.map((p) => ({
         id: p.id,
+        name: p.name,
         destroyed: p.destroyed,
         position: { x: p.object.body.position.x, y: p.object.body.position.y },
         velocity: { x: p.object.body.velocity.x, y: p.object.body.velocity.y },
@@ -178,6 +188,7 @@ export class GameScene extends Phaser.Scene {
       planets: [
         {
           id: this.playerPlanet.id,
+          name: this.playerPlanet.name,
           inputDirection: this.playerPlanet.inputDirection,
         },
       ],
@@ -202,7 +213,7 @@ export class GameScene extends Phaser.Scene {
   private handleStartMessage(data: any) {
     // create new planet instance with planet id
     data.planets.forEach((p: any, i: number) => {
-      const planet = this.createPlanet(p.id);
+      const planet = this.createPlanet(p.id, p.name);
       if (planet.id === this.peer.peer.id) {
         this.playerPlanet = planet;
         planet.isHost = true;

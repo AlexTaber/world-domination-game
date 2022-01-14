@@ -5,14 +5,16 @@ export class Planet {
   public object: Phaser.Physics.Arcade.Sprite;
   public destroyed = false;
   public inputDirection?: number = undefined;
-  public name = "apples";
+  // public name = "apples";
   public image = "bananas";
 
   constructor(
     public id: string,
+    public name: string,
     private scene: GameScene,
     private position: Phaser.Math.Vector2
   ) {
+    this.name = name;
     this.object = this.scene.physics.add.sprite(
       this.position.x,
       this.position.y,
