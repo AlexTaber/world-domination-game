@@ -12,16 +12,29 @@
     </div>
     <div id="game" />
   </div>
+
+  <div id="game" />
+
+  <p v-if="!showWinnerScreen">GAME</p>
+
+  <div v-else>
+    <WinnerScreen />
+  </div>
+
+  <WinnerScreen :winner="state.winner" />
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, computed } from "vue";
 import { useGameFactory } from "../factories/game.factory";
+import WinnerScreen from "./WinnerScreen.vue";
 import { usePublicGameState } from "../services/public-game-state.service";
 
-const { createGame } = useGameFactory();
-
 const { state } = usePublicGameState();
+
+const showWinnerScreen = computed(() => state.value.winner);
+
+const { createGame } = useGameFactory();
 
 let game: Phaser.Game | undefined = undefined;
 
