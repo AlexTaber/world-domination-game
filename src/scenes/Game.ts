@@ -24,7 +24,7 @@ export class GameScene extends Phaser.Scene {
   create() {
     this.inputService = new GameInputService(this);
     this.setSolarSystem();
-    this.setPlayerPlanet();
+    this.createPlanets();
     this.setColliders();
     this.subscribeToStream();
     this.sendStart();
@@ -42,17 +42,19 @@ export class GameScene extends Phaser.Scene {
     this.solarSystem = new SolarSystem(this);
   }
 
-  private setPlayerPlanet() {
-    this.playerPlanet = this.createPlanet();
-    this.playerPlanet.isPlayer = true;
+  private createPlanets() {
+    if (this.peer.state.isHost) {
+      this.playerPlanet = this.createPlanet(this.peer.peer.id);
+      this.playerPlanet.isPlayer = true;
 
-    this.createPlanet();
-    this.createPlanet();
-    this.createPlanet();
+      this.peer.state.connections.forEach(conn => {
+        this.createPlanet(conn.peer)
+      })
+    }
   }
 
-  private createPlanet() {
-    const planet = new Planet(this, this.getPlanetInitialPosition());
+  private createPlanet(id: string) {
+    const planet = new Planet(id, this, this.getPlanetInitialPosition());
     this.planets.push(planet);
     return planet;
   }
@@ -124,8 +126,11 @@ export class GameScene extends Phaser.Scene {
 
   private handleStartMessage(data: any) {
     data.planets.forEach((p: any, i: number) => {
-      const planet = this.planets[i];
-      planet.id = p.id;
+      const planet = this.createPlanet(p.id);
+      if (planet.id === this.peer.peer.id) {
+        this.playerPlanet = planet;
+        planet.isPlayer = true;
+      }
     });
     this.handleUpdateMessage(data);
   }

@@ -25,7 +25,7 @@ export const usePeer = () => {
   const open = (callback: (id: string) => void) => {
     peer.on("open", callback);
     peer.on("connection", (connection) => {
-      console.log("connection!")
+      console.log(connection)
       state.connections.push(connection);
     });
   }
@@ -54,6 +54,7 @@ export const usePeer = () => {
   return {
     peer,
     stream,
+    state,
     open,
     connect,
     setIsHost,

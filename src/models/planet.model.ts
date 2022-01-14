@@ -1,12 +1,12 @@
 import { GameScene } from "../scenes/Game";
 
 export class Planet {
-  public id = Math.random() * 10000000;
   public isPlayer = false;
   public object: Phaser.Physics.Arcade.Sprite;
   public destroyed = false;
 
   constructor(
+    public id: string,
     private scene: GameScene,
     private position: Phaser.Math.Vector2,
   ) {
