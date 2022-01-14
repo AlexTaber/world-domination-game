@@ -4,7 +4,7 @@ import { Planet } from '../models/planet.model';
 import { SolarSystem } from '../models/solar-system.model';
 import { GameInputService } from '../services/game-input.service';
 import { usePeer } from '../services/peer.service';
-import { usePublicGameState } from 'src/services/public-game-state.service';
+import { usePublicGameState } from '../services/public-game-state.service';
 
 export class GameScene extends Phaser.Scene {
   public solarSystem!: SolarSystem;

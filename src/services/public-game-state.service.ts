@@ -1,4 +1,4 @@
-import { GameScene } from "src/scenes/Game";
+import { GameScene } from "../scenes/Game";
 import { ref, Ref } from "vue";
 
 interface PublicGameState {
