@@ -7,6 +7,7 @@ import { Asteroid } from '../models/asteroid.model';
 import { GameInputService } from '../services/game-input.service';
 import { usePeer } from '../services/peer.service';
 import { usePublicGameState } from '../services/public-game-state.service';
+import { useStats } from "../services/stats.service";
 
 export class GameScene extends Phaser.Scene {
   public solarSystem!: SolarSystem;
@@ -17,6 +18,7 @@ export class GameScene extends Phaser.Scene {
 
   private peer = usePeer();
   private canvas = useCanvas();
+  private stats = useStats();
   private publicGameState = usePublicGameState();
   private playerFormStoreState = usePlayerFormState();
   private inputService?: GameInputService;
@@ -94,6 +96,7 @@ export class GameScene extends Phaser.Scene {
       this.getPlanetInitialPosition(this.planets.length)
     );
     this.planets.push(planet);
+    this.stats.addPlanet(planet.id);
     return planet;
   }
 
@@ -264,7 +267,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handleGameOverMessage(data: any) {
-    this.winnerId = data.winnerId;
+    this.setWinnerId(data.winnerId);
   }
 
   private handleNewGameMessage(data: any) {
@@ -281,7 +284,7 @@ export class GameScene extends Phaser.Scene {
   };
 
   private handleGameOver(planet: Planet) {
-    this.winnerId = planet.id;
+    this.setWinnerId(planet.id);
     if (this.peer.state.isHost) {
       this.peer.send("gameOver", { winnerId: planet.id });
     }
@@ -291,5 +294,10 @@ export class GameScene extends Phaser.Scene {
 
   private updatePublicGameState() {
     this.publicGameState.updateFromGame(this);
+  }
+
+  private setWinnerId(winnerId: string) {
+    this.winnerId = winnerId;
+    this.stats.incrementPlanetWins(winnerId);
   }
 }

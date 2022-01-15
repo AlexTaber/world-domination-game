@@ -2,11 +2,11 @@
   <div class="leaderBoard">
     <div
       class="player"
-      v-for="planet in state.planets"
+      v-for="planet in orderedPlanets"
       :key="planet.id"
       :class="{ destroyed: planet.destroyed, winner: planet.id === state.winner?.id }"
     >
-      <p>{{ planet.name }}</p>
+      <p>{{ getWins(planet) }} - {{ planet.name }}</p>
       <p class="skull">&#128128;</p>
       <p class="wasted">WASTED</p>
       <p class="winnerText">WINNER</p>
@@ -15,9 +15,17 @@
 </template>
 
 <script setup lang="ts">
-import { usePublicGameState } from "../services/public-game-state.service";
+import { useStats } from "../services/stats.service";
+import { PublicPlanet, usePublicGameState } from "../services/public-game-state.service";
+import { computed } from "vue";
 
 const { state } = usePublicGameState();
+
+const { state: stats } = useStats();
+
+const getWins = (planet: PublicPlanet) => stats.value.planets[planet.id]?.wins || 0;
+
+const orderedPlanets = computed(() => state.value.planets.sort((a, b) => stats.value.planets[a.id]!.wins > stats.value.planets[b.id]!.wins ? -1 : 1));
 </script>
 
 <style scoped>
@@ -30,10 +38,11 @@ const { state } = usePublicGameState();
 
 .player {
   border-left: 5px solid green;
-  padding: 4px 8px;
+  padding: 4px 8px 4px 30px;
   min-width: 150px;
   position: relative;
   background-color: rgba(0, 128, 0, 0.1);
+  text-align: left;
 }
 
 .player + .player {
@@ -59,8 +68,8 @@ const { state } = usePublicGameState();
   font-weight: bold;
   color: red;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  right: 0;
+  transform: translate(-15%, -40%);
 }
 
 .winnerText {
@@ -69,8 +78,8 @@ const { state } = usePublicGameState();
   font-weight: bold;
   color: green;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -40%);
+  right: 0;
+  transform: translate(-15%, -40%);
 }
 
 .player.destroyed .skull {
@@ -113,11 +122,12 @@ const { state } = usePublicGameState();
     visibility: visible;
   }
   50% {
-    transform: scale(2);
+    transform: scale(1.4);
     opacity: 1;
   }
   100% {
     opacity: 0;
+    transform: translate(-15%, -40%);
   }
 }
 
@@ -128,11 +138,11 @@ const { state } = usePublicGameState();
     visibility: visible;
   }
   50% {
-    transform: scale(2);
+    transform: scale(1.4);
     opacity: 1;
   }
   100% {
-    transform: translate(-50%, -40%);
+    transform: translate(-15%, -40%);
   }
 }
 </style>
