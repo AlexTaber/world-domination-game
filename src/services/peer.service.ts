@@ -27,6 +27,10 @@ export const usePeer = () => {
       stream.next({ type: "connection", data: state.connections.length + 1 });
 
       connection.on("data", (message) => stream.next(message));
+
+      connection.on("close", () => {
+        console.log("disconnect!");
+      });
     });
   }
 
