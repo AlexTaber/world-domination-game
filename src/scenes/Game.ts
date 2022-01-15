@@ -10,6 +10,7 @@ import { usePublicGameState } from '../services/public-game-state.service';
 import { useStats } from "../services/stats.service";
 
 export class GameScene extends Phaser.Scene {
+  public planetParticles!: Phaser.GameObjects.Particles.ParticleEmitterManager;
   public solarSystem!: SolarSystem;
   public playerPlanet!: Planet;
   public winnerId?: string = undefined;
@@ -32,15 +33,16 @@ export class GameScene extends Phaser.Scene {
     this.load.image("planet1", "../assets/planet-1.png");
     this.load.image("sun", "../assets/sun.png");
     this.load.image("background", "../assets/background.jpg");
-    this.load.image('asteroid', "/assets/asteroid.png")
+    this.load.image('asteroid', "/assets/asteroid.png");
+    this.load.image('particleBlue', '/assets/particle-blue.png');
   }
 
   public create() {
+    this.planetParticles = this.add.particles("particleBlue");
     this.inputService = new GameInputService(this);
     this.setSolarSystem();
-    // creates planets
     this.createPlanetsIfHost();
-    this.createAsteroids();
+    // this.createAsteroids();
     this.setColliders();
     this.subscribeToStream();
     this.sendStartIfHost();
@@ -78,6 +80,8 @@ export class GameScene extends Phaser.Scene {
   private createPlanetsIfHost() {
     if (this.peer.state.isHost) {
       this.playerPlanet = this.createPlanet(this.peer.peer.id);
+      this.playerPlanet.emitter.setTint(0xffffff);
+      this.playerPlanet.object.setTint(0xffffff);
       this.playerPlanet.setName(this.playerFormStoreState.state.value.name);
       this.playerPlanet.isHost = true;
 
@@ -231,6 +235,8 @@ export class GameScene extends Phaser.Scene {
       const planet = this.createPlanet(p.id);
       if (planet.id === this.peer.peer.id) {
         this.playerPlanet = planet;
+        this.playerPlanet.emitter.setTint(0xffffff);
+        this.playerPlanet.object.setTint(0xffffff);
         this.playerPlanet.setName(this.playerFormStoreState.state.value.name);
         planet.isHost = true;
       }

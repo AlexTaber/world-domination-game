@@ -8,7 +8,7 @@
     >
       <p>{{ getWins(planet) }} - {{ planet.name }}</p>
       <p class="skull">&#128128;</p>
-      <p class="wasted">WASTED</p>
+      <p class="destroyedText">Destroyed</p>
       <p class="winnerText">WINNER</p>
     </div>
   </div>
@@ -62,7 +62,7 @@ const orderedPlanets = computed(() => state.value.planets.sort((a, b) => stats.v
   left: -30%;
 }
 
-.wasted {
+.destroyedText {
   visibility: hidden;
   position: absolute;
   font-weight: bold;
@@ -86,16 +86,16 @@ const orderedPlanets = computed(() => state.value.planets.sort((a, b) => stats.v
   visibility: visible;
 }
 
-.player.destroyed .wasted {
-  animation: wasted-animation 1s ease-in-out;
+.player.destroyed .destroyedText {
+  animation: destroyedText-animation 0.8s ease-in-out;
 }
 
 .player.destroyed {
-  animation: scale-animation 1s ease-in-out;
+  animation: scale-animation 0.8s ease-in-out;
 }
 
 .player.winner .winnerText {
-  animation: winner-animation 1s ease-in-out;
+  animation: winner-animation 0.8s ease-in-out;
   visibility: visible;
 }
 
@@ -115,7 +115,7 @@ const orderedPlanets = computed(() => state.value.planets.sort((a, b) => stats.v
   }
 }
 
-@keyframes wasted-animation {
+@keyframes destroyedText-animation {
   0% {
     transform: scale(1);
     opacity: 0;

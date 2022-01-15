@@ -17,9 +17,9 @@ export class SolarSystem {
     const position = this.canvas.getCenter();
     this.diameter = this.canvas.getPercentageHeight(95);
 
-    const background = this.scene.add.image(400, 300, "background");
-    background.setScale(1.1);
-    this.orbitSpace = this.scene.add.circle(position.x, position.y, this.radius, 0xffffff, 0.15);
+    // const background = this.scene.add.image(400, 300, "background");
+    // background.setScale(1.1);
+    this.orbitSpace = this.scene.add.circle(position.x, position.y, this.radius, 0xffffff, 0.06);
 
     this.sunObject = this.scene.physics.add.sprite(position.x, position.y, "sun");
     this.sunObject.setScale(0.7);
@@ -40,7 +40,7 @@ export class SolarSystem {
 
   public get radius() : number {
     return this.diameter / 2;
-  }  
+  }
 
   public reset() {
     this.diameter = this.canvas.getPercentageHeight(95);

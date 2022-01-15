@@ -7,26 +7,51 @@ export class Planet {
   public inputDirection?: number = undefined;
   public name = "apples";
   public image = "bananas";
+  public emitter: Phaser.GameObjects.Particles.ParticleEmitter;
 
+  private maxVelocity = 1000;
   private nameLabel: Phaser.GameObjects.Text;
+
+  private get speed() {
+    return Phaser.Math.Distance.Between(0, 0, this.object.body.velocity.x, this.object.body.velocity.y);
+  }
+
+  private get speedRelativeToMax() {
+    return this.speed / this.maxVelocity;
+  }
 
   constructor(
     public id: string,
     private scene: GameScene,
     private position: Phaser.Math.Vector2
   ) {
+    this.emitter = this.scene.planetParticles.createEmitter({
+      alpha: { start: 1, end: 0 },
+      scale: 0.5,
+      lifespan: 200,
+      blendMode: 'ADD',
+      tint: 0xFF0000,
+      frequency: 10,
+    });
+
     this.object = this.scene.physics.add.sprite(
       this.position.x,
       this.position.y,
-      "planet1"
+      "sun"
     );
+    const size = 44;
     this.object.setOrigin(0.5, 0.5);
-    this.object.body.setCircle(30);
-    this.object.setScale(0.6);
+    this.object.body.setCircle(size);
+    this.object.setScale(0.4);
     this.object.setData("planet", this);
     this.object.setBounce(1.3);
     this.object.setDrag(200);
+    this.object.setAlpha(1);
+    this.object.setTint(0xff0000);
+    this.object.body.setOffset(210, 210);
     this.setPosition(this.position.x, this.position.y);
+
+    this.emitter.startFollow(this.object);
 
     this.nameLabel = this.scene.add.text(position.x, position.y, this.name);
   }
@@ -47,8 +72,8 @@ export class Planet {
 
   public move(direction: number) {
     this.object.setDrag(0);
-    const x = Math.cos(Phaser.Math.DegToRad(direction)) * 1000;
-    const y = Math.sin(Phaser.Math.DegToRad(direction)) * 1000;
+    const x = Math.cos(Phaser.Math.DegToRad(direction)) * this.maxVelocity;
+    const y = Math.sin(Phaser.Math.DegToRad(direction)) * this.maxVelocity;
     this.object.body.velocity.lerp(new Phaser.Math.Vector2(x, y), 0.035);
   }
 
@@ -65,6 +90,4 @@ export class Planet {
     this.object.setVelocity(0);
     console.log("DEATH");
   }
-
-
 }
