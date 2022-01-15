@@ -5,16 +5,17 @@
         class="player"
         v-for="planet in state.planets"
         :key="planet.id"
-        :class="{ destroyed: planet.destroyed }"
+        :class="{ destroyed: planet.destroyed, winner: planet.id === winner?.id }"
       >
         <p>{{ planet.name }}</p>
         <p class="skull">&#128128;</p>
         <p class="wasted">WASTED</p>
+        <p class="winnerText">WINNER</p>
       </div>
     </div>
 
-    <div class="gameWrapper">
-      <div class="gameOver">
+    <div class="gameWrapper" :style="{ width: size.width, height: size.height }">
+      <div class="gameOverOverlay">
         <WinnerScreen v-if="winner" :winner="winner" />
       </div>
 
@@ -28,8 +29,11 @@ import { onMounted, onUnmounted, computed } from "vue";
 import { useGameFactory } from "../factories/game.factory";
 import WinnerScreen from "./WinnerScreen.vue";
 import { usePublicGameState } from "../services/public-game-state.service";
+import { useCanvas } from "../services/canvas.service";
 
 const { state } = usePublicGameState();
+
+const { size } = useCanvas();
 
 const winner = computed(() => state.value.winner);
 
@@ -46,6 +50,16 @@ onUnmounted(() => game?.destroy(true, false));
 .gameContainer {
   display: flex;
   justify-content: center;
+}
+
+.gameWrapper {
+  position: relative;
+}
+
+.gameOverOverlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
 }
 
 .leaderBoard {
@@ -90,6 +104,16 @@ onUnmounted(() => game?.destroy(true, false));
   transform: translate(-50%, -50%);
 }
 
+.winnerText {
+  visibility: hidden;
+  position: absolute;
+  font-weight: bold;
+  color: green;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -40%);
+}
+
 .player.destroyed .skull {
   visibility: visible;
 }
@@ -99,14 +123,26 @@ onUnmounted(() => game?.destroy(true, false));
 }
 
 .player.destroyed {
-  animation: scale-animation 0.5s ease-in-out;
+  animation: scale-animation 1s ease-in-out;
 }
 
+.player.winner .winnerText {
+  animation: winner-animation 1s ease-in-out;
+  visibility: visible;
+}
+
+/* .player.winner {
+  animation: scale-animation 0.5s ease-in-out;
+} */
+
 @keyframes scale-animation {
-  from {
-    transform: scale(1.2);
+  0% {
+    transform: scale(1);
   }
-  to {
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
     transform: scale(1);
   }
 }
@@ -123,6 +159,21 @@ onUnmounted(() => game?.destroy(true, false));
   }
   100% {
     opacity: 0;
+  }
+}
+
+@keyframes winner-animation {
+  0% {
+    transform: scale(1);
+    opacity: 0;
+    visibility: visible;
+  }
+  50% {
+    transform: scale(2);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -40%);
   }
 }
 </style>
