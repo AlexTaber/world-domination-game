@@ -269,6 +269,7 @@ export class GameScene extends Phaser.Scene {
 
   private handleNewGameMessage(data: any) {
     this.winnerId = undefined;
+    this.solarSystem.reset();
     this.handleUpdateMessage(data);
   }
 
