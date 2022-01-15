@@ -9,6 +9,7 @@
       >
         <p>{{ planet.name }}</p>
         <p class="skull">&#128128;</p>
+        <p class="wasted">WASTED</p>
       </div>
     </div>
 
@@ -79,19 +80,49 @@ onUnmounted(() => game?.destroy(true, false));
   left: -30%;
 }
 
+.wasted {
+  visibility: hidden;
+  position: absolute;
+  font-weight: bold;
+  color: red;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 .player.destroyed .skull {
   visibility: visible;
 }
 
-.gameWrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
+.player.destroyed .wasted {
+  animation: wasted-animation 1s ease-in-out;
 }
 
-.gameOver {
-  position: absolute;
-  width: 100%;
-  height: 100%;
+.player.destroyed {
+  animation: scale-animation 0.5s ease-in-out;
+}
+
+@keyframes scale-animation {
+  from {
+    transform: scale(1.2);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes wasted-animation {
+  0% {
+    transform: scale(1);
+    opacity: 0;
+    visibility: visible;
+  }
+  50% {
+    transform: scale(2);
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 </style>
