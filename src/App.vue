@@ -1,8 +1,4 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/games/new">New Game</router-link>
-  </div>
   <router-view v-if="peerId" />
 </template>
 

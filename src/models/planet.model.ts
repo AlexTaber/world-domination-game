@@ -68,7 +68,7 @@ export class Planet {
     this.object.setDrag(0);
     const x = Math.cos(Phaser.Math.DegToRad(direction)) * this.maxVelocity;
     const y = Math.sin(Phaser.Math.DegToRad(direction)) * this.maxVelocity;
-    this.object.body.velocity.lerp(new Phaser.Math.Vector2(x, y), 0.035);
+    this.object.body.velocity.lerp(new Phaser.Math.Vector2(x, y), 0.03);
   }
 
   public setPosition(x: number, y: number) {
