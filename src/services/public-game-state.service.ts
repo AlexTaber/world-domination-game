@@ -9,7 +9,8 @@ interface PublicGameState {
 export interface PublicPlanet {
   id: string;
   name: string;
-  image?: string;
+  destroyed: boolean;
+  isPlayer: boolean;
 }
 
 const state = ref({
@@ -18,7 +19,7 @@ const state = ref({
 
 export const usePublicGameState = () => {
   const updateFromGame = (game: GameScene) => {
-    const publicPlanets = game.planets.map((p) => ({ id: p.id, name: p.name, destroyed: p.destroyed }));
+    const publicPlanets = getPublicPlanetsFromGame(game);
     update({
       winner: publicPlanets.find((p) => p.id === game.winnerId),
       planets: publicPlanets,
@@ -31,6 +32,15 @@ export const usePublicGameState = () => {
       ...newState,
     };
   };
+
+  const getPublicPlanetsFromGame = (game: GameScene) => {
+    return game.planets.map((p) => ({
+      id: p.id,
+      name: p.name,
+      destroyed: p.destroyed,
+      isPlayer: p.id === game.playerPlanet?.id,
+    }));
+  }
 
   return {
     state,

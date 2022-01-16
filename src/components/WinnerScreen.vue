@@ -1,6 +1,12 @@
 <template>
-  <h1 id="congratsMessage">CONGRATS</h1>
-  <h1 class="winnerName">{{ winner.name }}!</h1>
+  <div class="winnerScreen">
+    <h2>WINNER</h2>
+
+    <h1 :class="{
+      winnerText: true,
+      player: winner?.isPlayer,
+    }">{{ winner?.name }}</h1>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -13,26 +19,21 @@ const props = defineProps<{
 
 const winner = props.winner;
 </script>
+
 <style scoped>
-#congratsMessage {
-  color: Orange;
-  font-size: 50px;
-  font-family: Monaco;
-}
-.rotate {
-  animation: rotation 4s infinite linear;
-}
-
-@keyframes rotation {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(359deg);
-  }
+.winnerScreen {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  height: 100%;
+  padding-top: 120px;
 }
 
-.winnerName {
-  color: white
+.winnerText {
+  color: red;
+}
+
+.player {
+  color: #85c2ff;
 }
 </style>

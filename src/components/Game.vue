@@ -1,10 +1,10 @@
 <template>
-  <div class="gameContainer">
-    <Leaderboard />
+  <Leaderboard class="leaderboard" />
 
+  <div class="gameContainer">
     <div class="gameWrapper">
-      <div class="gameOverOverlay">
-        <WinnerScreen v-if="winner" :winner="winner" />
+      <div v-if="winner" class="gameOverOverlay">
+        <WinnerScreen :winner="winner" />
       </div>
 
       <div id="game" />
@@ -33,6 +33,13 @@ onUnmounted(() => game?.destroy(true, false));
 </script>
 
 <style>
+.leaderboard {
+  position: fixed;
+  left: 50px;
+  top: 50px;
+  z-index: 1;
+}
+
 .gameContainer {
   display: flex;
   justify-content: center;
@@ -46,5 +53,6 @@ onUnmounted(() => game?.destroy(true, false));
   position: absolute;
   width: 100%;
   height: 100%;
+  background: rgba(16, 12, 8, 0.5);
 }
 </style>

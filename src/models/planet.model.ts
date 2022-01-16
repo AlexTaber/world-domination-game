@@ -55,7 +55,7 @@ export class Planet {
   }
 
   public update() {
-    if (this.inputDirection != undefined && !this.destroyed)
+    if (this.inputDirection != undefined && !this.destroyed && !this.scene.winnerId)
       this.move(this.inputDirection);
   }
 

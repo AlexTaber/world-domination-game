@@ -67,6 +67,7 @@ export class GameScene extends Phaser.Scene {
       const position = this.getPlanetInitialPosition(i);
       p.object.body.position.x = position.x;
       p.object.body.position.y = position.y;
+      p.setPosition(position.x, position.y);
       p.destroyed = false;
     });
 
@@ -125,7 +126,6 @@ export class GameScene extends Phaser.Scene {
 
   private destroyPlanet(planet: Planet) {
     planet.destroy();
-    this.handleGameOverIfOnePlanetLeft();
   }
 
   private setColliders() {
@@ -152,6 +152,9 @@ export class GameScene extends Phaser.Scene {
   private handleDestroyedPlanets() {
     this.planetsMarkedForDestruction.forEach((p) => this.destroyPlanet(p));
     this.planetsMarkedForDestruction = [];
+    if (!this.winnerId) {
+      this.handleGameOverIfOnePlanetLeft();
+    }
   }
 
   private handlePlanetsLeftOrbit() {
@@ -280,6 +283,7 @@ export class GameScene extends Phaser.Scene {
   private handleNewGameMessage(data: any) {
     this.winnerId = undefined;
     this.solarSystem.reset();
+    this.planets.forEach((p) => p.object.setVelocity(0));
     this.handleUpdateMessage(data);
   }
 
@@ -294,6 +298,7 @@ export class GameScene extends Phaser.Scene {
     this.setWinnerId(planet.id);
     if (this.peer.state.isHost) {
       this.peer.send("gameOver", { winnerId: planet.id });
+      this.time.delayedCall(2000, () => this.startNewGame(), undefined, this);
     }
 
     this.planets.forEach((p) => p.object.setVelocity(0));
