@@ -221,7 +221,7 @@ export class GameScene extends Phaser.Scene {
         {
           id: this.playerPlanet.id,
           name: this.playerPlanet.name,
-          inputDirection: this.playerPlanet.inputDirection,
+          input: this.playerPlanet.input,
         },
       ],
     };
@@ -278,7 +278,7 @@ export class GameScene extends Phaser.Scene {
             planet.destroyed = p.destroyed;
           }
         } else {
-          planet.inputDirection = p.inputDirection;
+          planet.input = p.input;
           planet.setName(p.name);
         }
       }

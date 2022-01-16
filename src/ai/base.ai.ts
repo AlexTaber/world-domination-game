@@ -1,13 +1,8 @@
-import { Planet } from "../models/planet.model";
+import { Planet, PlanetInput } from "../models/planet.model";
 import { GameScene } from "../scenes/Game";
 
-export interface AIInput {
-  direction: number;
-  throttle: number;
-}
-
 export interface AI {
-  getInput(): AIInput;
+  getInput(): PlanetInput;
   reset(): void;
 }
 

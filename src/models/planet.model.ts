@@ -3,13 +3,17 @@ import { GameScene } from "../scenes/Game";
 import { AI } from "../ai/base.ai";
 import { AlexAI } from "../ai/alex.ai";
 
+export interface PlanetInput {
+  direction?: number;
+  throttle: number;
+}
+
 export class Planet {
   public isAi = false;
   public isHost = false;
   public object: Phaser.Physics.Arcade.Sprite;
   public destroyed = false;
-  public inputDirection?: number = undefined;
-  public throttle = 1;
+  public input: PlanetInput = { direction: undefined, throttle: 1 };
   public name = getRandomPlanetName();
   public image = "bananas";
   public emitter: Phaser.GameObjects.Particles.ParticleEmitter;
@@ -71,13 +75,11 @@ export class Planet {
   public update() {
     if (!this.destroyed && !this.scene.winnerId) {
       if (this.isAi) {
-        const input = this.ai.getInput();
-        this.inputDirection = input.direction;
-        this.throttle = input.throttle;
+        this.input = this.ai.getInput();
       }
 
-      if (this.inputDirection != undefined) {
-        this.move(this.inputDirection, this.throttle);
+      if (this.input.direction != undefined) {
+        this.move(this.input);
       }
     }
   }
@@ -86,11 +88,11 @@ export class Planet {
     this.nameLabel.setPosition(this.object.body.position.x + (this.object.body.width * 0.5), this.object.body.position.y - 20);
   }
 
-  public move(direction: number, throttle: number) {
-    const velocity = this.maxVelocity * throttle;
+  public move(input: PlanetInput) {
+    const velocity = this.maxVelocity * input.throttle;
     this.object.setDrag(0);
-    const x = Math.cos(Phaser.Math.DegToRad(direction)) * velocity;
-    const y = Math.sin(Phaser.Math.DegToRad(direction)) * velocity;
+    const x = Math.cos(Phaser.Math.DegToRad(input.direction!)) * velocity;
+    const y = Math.sin(Phaser.Math.DegToRad(input.direction!)) * velocity;
     this.object.body.velocity.lerp(new Phaser.Math.Vector2(x, y), this.isAi ? 0.035 : 0.03);
   }
 

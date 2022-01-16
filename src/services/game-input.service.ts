@@ -50,7 +50,7 @@ export class GameInputService {
       }
     }
 
-    this.scene.playerPlanet.inputDirection = direction;
+    this.scene.playerPlanet.input = { direction, throttle: 1 };
   }
 
   private handleStartNewGameInput() {
