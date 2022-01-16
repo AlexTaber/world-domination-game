@@ -13,3 +13,7 @@ export function arrayUpdateItemByProperty<T, K extends keyof T>(
 
   return itemFound || !upsert ? mappedArray : [...array, payload as T];
 }
+
+export function arrayRandom<T>(array: T[]): T {
+  return array[Math.floor(Math.random() * array.length)];
+}

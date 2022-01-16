@@ -1,3 +1,4 @@
+import { getRandomPlanetName } from "../services/planet-name.generator";
 import { GameScene } from "../scenes/Game";
 
 export class Planet {
@@ -5,20 +6,12 @@ export class Planet {
   public object: Phaser.Physics.Arcade.Sprite;
   public destroyed = false;
   public inputDirection?: number = undefined;
-  public name = "apples";
+  public name = getRandomPlanetName();
   public image = "bananas";
   public emitter: Phaser.GameObjects.Particles.ParticleEmitter;
 
   private maxVelocity = 1000;
   private nameLabel: Phaser.GameObjects.Text;
-
-  private get speed() {
-    return Phaser.Math.Distance.Between(0, 0, this.object.body.velocity.x, this.object.body.velocity.y);
-  }
-
-  private get speedRelativeToMax() {
-    return this.speed / this.maxVelocity;
-  }
 
   constructor(
     public id: string,
