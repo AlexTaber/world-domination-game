@@ -1,6 +1,7 @@
 import { getRandomPlanetName } from "../services/planet-name.generator";
 import { GameScene } from "../scenes/Game";
-import { usePlanetAi } from "../services/planet-ai.service";
+import { AI } from "../ai/base.ai";
+import { AlexAI } from "../ai/alex.ai";
 
 export class Planet {
   public isAi = false;
@@ -8,20 +9,21 @@ export class Planet {
   public object: Phaser.Physics.Arcade.Sprite;
   public destroyed = false;
   public inputDirection?: number = undefined;
+  public throttle = 1;
   public name = getRandomPlanetName();
   public image = "bananas";
   public emitter: Phaser.GameObjects.Particles.ParticleEmitter;
 
   private maxVelocity = 1000;
   private nameLabel: Phaser.GameObjects.Text;
-  private ai: ReturnType<typeof usePlanetAi>;
+  private ai: AI;
 
   constructor(
     public id: string,
     private scene: GameScene,
     private position: Phaser.Math.Vector2
   ) {
-    this.ai = usePlanetAi(this, this.scene);
+    this.ai = new AlexAI(this, this.scene);
 
     this.emitter = this.scene.planetParticles.createEmitter({
       alpha: { start: 1, end: 0 },
@@ -69,11 +71,13 @@ export class Planet {
   public update() {
     if (!this.destroyed && !this.scene.winnerId) {
       if (this.isAi) {
-        this.inputDirection = this.ai.getMoveDirection();
+        const input = this.ai.getInput();
+        this.inputDirection = input.direction;
+        this.throttle = input.throttle;
       }
 
       if (this.inputDirection != undefined) {
-        this.move(this.inputDirection);
+        this.move(this.inputDirection, this.throttle);
       }
     }
   }
@@ -82,8 +86,8 @@ export class Planet {
     this.nameLabel.setPosition(this.object.body.position.x + (this.object.body.width * 0.5), this.object.body.position.y - 20);
   }
 
-  public move(direction: number) {
-    const velocity = this.isAi ? this.maxVelocity * 0.85 : this.maxVelocity;
+  public move(direction: number, throttle: number) {
+    const velocity = this.maxVelocity * throttle;
     this.object.setDrag(0);
     const x = Math.cos(Phaser.Math.DegToRad(direction)) * velocity;
     const y = Math.sin(Phaser.Math.DegToRad(direction)) * velocity;
