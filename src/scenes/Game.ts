@@ -1,5 +1,5 @@
 import { usePlayerFormState } from "../services/player-form.service";
-import Phaser from 'phaser';
+import Phaser, { Game } from 'phaser';
 import { useCanvas } from '../services/canvas.service';
 import { Planet } from '../models/planet.model';
 import { SolarSystem } from '../models/solar-system.model';
@@ -24,6 +24,7 @@ export class GameScene extends Phaser.Scene {
   private playerFormStoreState = usePlayerFormState();
   private inputService?: GameInputService;
   private planetsMarkedForDestruction: Planet[] = [];
+  private newGameTimer?: Phaser.Time.TimerEvent;
 
   constructor() {
     super("GameScene");
@@ -73,6 +74,7 @@ export class GameScene extends Phaser.Scene {
 
     this.sendNewIfHost();
     this.solarSystem.reset();
+    this.newGameTimer?.destroy();
   }
 
   private setSolarSystem() {
@@ -277,7 +279,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handleGameOverMessage(data: any) {
-    this.setWinnerId(data.winnerId);
+    this.onGameOver(data.winnerId);
   }
 
   private handleNewGameMessage(data: any) {
@@ -290,18 +292,20 @@ export class GameScene extends Phaser.Scene {
   private handleGameOverIfOnePlanetLeft = () => {
     const remainingPlanets = this.planets.filter((p) => !p.destroyed);
     if (remainingPlanets.length === 1) {
-      this.handleGameOver(remainingPlanets[0]);
+      this.onHostGameOver(remainingPlanets[0]);
     }
   };
 
-  private handleGameOver(planet: Planet) {
-    this.setWinnerId(planet.id);
-    if (this.peer.state.isHost) {
-      this.peer.send("gameOver", { winnerId: planet.id });
-      this.time.delayedCall(2000, () => this.startNewGame(), undefined, this);
-    }
-
+  private onHostGameOver(planet: Planet) {
+    this.onGameOver(planet.id);
     this.planets.forEach((p) => p.object.setVelocity(0));
+    this.peer.send("gameOver", { winnerId: planet.id });
+    this.newGameTimer = this.time.delayedCall(1200, () => this.startNewGame(), undefined, this);
+  }
+
+  private onGameOver(planetId: string) {
+    this.setWinnerId(planetId);
+    this.solarSystem.pauseShrink();
   }
 
   private updatePublicGameState() {

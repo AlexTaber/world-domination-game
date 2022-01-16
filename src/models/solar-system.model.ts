@@ -40,6 +40,10 @@ export class SolarSystem {
     }
   }
 
+  public pauseShrink() {
+    this.isShrinking = false;
+  }
+
   public reset() {
     this.diameter = this.canvas.getPercentageHeight(95);
     this.orbitSpace.setRadius(this.radius);

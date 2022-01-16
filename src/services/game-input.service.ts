@@ -6,7 +6,7 @@ export class GameInputService {
   private left: Phaser.Input.Keyboard.Key;
   private up: Phaser.Input.Keyboard.Key;
   private down: Phaser.Input.Keyboard.Key;
-  private enter: Phaser.Input.Keyboard.Key;
+  private newGameKey: Phaser.Input.Keyboard.Key;
   private peer = usePeer();
 
   constructor(
@@ -16,7 +16,7 @@ export class GameInputService {
     this.left = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT, false);
     this.up = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP, false);
     this.down = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN, false);
-    this.enter = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER, false);
+    this.newGameKey = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC, false);
   }
 
   public update() {
@@ -54,7 +54,7 @@ export class GameInputService {
   }
 
   private handleStartNewGameInput() {
-    if (this.peer.state.isHost && this.enter.isDown) {
+    if (this.peer.state.isHost && this.newGameKey.isDown) {
       this.scene.startNewGame();
     }
   }
