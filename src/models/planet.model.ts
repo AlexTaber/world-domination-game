@@ -117,7 +117,6 @@ export class Planet {
     this.destroyed = true;
     this.object.setPosition(-10000000);
     this.object.setVelocity(0);
-    console.log("DEATH");
   }
 
   private setAI(ai: typeof BaseAI | undefined) {

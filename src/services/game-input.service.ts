@@ -57,7 +57,7 @@ export class GameInputService {
 
   private handleStartNewGameInput() {
     if (this.peer.state.isHost && this.newGameKey.isDown) {
-      this.scene.startNewGame();
+      this.scene.hostStartNewGame();
     }
   }
 }

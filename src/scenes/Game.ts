@@ -5,11 +5,11 @@ import { Planet, PlanetOptions } from '../models/planet.model';
 import { SolarSystem } from '../models/solar-system.model';
 import { Asteroid } from '../models/asteroid.model';
 import { GameInputService } from '../services/game-input.service';
-import { usePeer } from '../services/peer.service';
 import { usePublicGameState } from '../services/public-game-state.service';
 import { useStats } from "../services/stats.service";
 import { useLobby } from "../services/lobby.service";
 import { useAISelector } from "../services/ai.selector";
+import { useGamePeer } from "../services/game-peer.service";
 
 export class GameScene extends Phaser.Scene {
   public planetParticles!: Phaser.GameObjects.Particles.ParticleEmitterManager;
@@ -19,7 +19,7 @@ export class GameScene extends Phaser.Scene {
   public planets: Planet[] = [];
   public astroids: Asteroid[] = [];
 
-  private peer = usePeer();
+  private gamePeer = useGamePeer(this);
   private canvas = useCanvas();
   private stats = useStats();
   private lobby = useLobby();
@@ -48,8 +48,8 @@ export class GameScene extends Phaser.Scene {
     this.setSolarSystem();
     this.createPlanetsIfHost();
     this.setColliders();
-    this.subscribeToStream();
-    this.sendStartIfHost();
+    this.gamePeer.subscribe();
+    this.gamePeer.sendStartIfHost();
   }
 
   public update() {
@@ -57,15 +57,16 @@ export class GameScene extends Phaser.Scene {
     this.inputService?.update();
     this.updatePlanets();
 
-    if (this.peer.state.isHost) {
+    if (this.gamePeer.isHost) {
       this.handlePlanetsLeftOrbit();
       this.handleDestroyedPlanets();
+      this.gamePeer.sendUpdate();
     }
-    this.sendUpdate();
+
     this.updatePublicGameState();
   }
 
-  public startNewGame() {
+  public hostStartNewGame() {
     this.winnerId = undefined;
     this.planets.forEach((p, i) => {
       const position = this.getPlanetInitialPosition(i);
@@ -75,35 +76,12 @@ export class GameScene extends Phaser.Scene {
       p.destroyed = false;
     });
 
-    this.sendNewIfHost();
+    this.gamePeer.sendNew();
     this.solarSystem.reset();
     this.newGameTimer?.destroy();
   }
 
-  private setSolarSystem() {
-    this.solarSystem = new SolarSystem(this);
-  }
-
-  private createPlanetsIfHost() {
-    if (this.peer.state.isHost) {
-      if (!this.lobby.state.value.aiOnly) {
-        this.playerPlanet = this.createPlanet(this.peer.peer.id, { tint: 0x85c2ff });
-        this.playerPlanet.setName(this.playerFormStoreState.state.value.name);
-      }
-
-      this.peer.state.connections.forEach((conn) => {
-        this.createPlanet(
-          conn.peer,
-        );
-      });
-
-      Array.from({ length: this.lobby.state.value.aiBots }, (x, i) => {
-        const aiPlanet = this.createPlanet(`ai${i + 1}`, { ai: this.aiSelector.getAI() });
-      });
-    }
-  }
-
-  private createPlanet(id: string, options: PlanetOptions = {}) {
+  public createPlanet(id: string, options: PlanetOptions = {}) {
     const planet = new Planet(
       id,
       this,
@@ -115,6 +93,37 @@ export class GameScene extends Phaser.Scene {
     return planet;
   }
 
+  public onGameOver(planetId: string) {
+    this.setWinnerId(planetId);
+    this.solarSystem.pauseShrink();
+    this.planets.forEach(p => p.onGameOver());
+  }
+
+  private setSolarSystem() {
+    this.solarSystem = new SolarSystem(this);
+  }
+
+  private createPlanetsIfHost() {
+    if (this.gamePeer.isHost) {
+      if (!this.lobby.state.value.aiOnly) {
+        this.playerPlanet = this.createPlanet(this.gamePeer.peerId, {
+          tint: 0x85c2ff,
+          name: this.playerFormStoreState.state.value.name
+        });
+      }
+
+      this.gamePeer.connections.forEach((conn) => {
+        this.createPlanet(
+          conn.peer,
+        );
+      });
+
+      Array.from({ length: this.lobby.state.value.aiBots }, (x, i) => {
+        const aiPlanet = this.createPlanet(`ai${i + 1}`, { ai: this.aiSelector.getAI() });
+      });
+    }
+  }
+
   private getPlanetInitialPosition(index: number) {
     const dir = index * 135;
     const dis = this.solarSystem.diameter * 0.3;
@@ -124,14 +133,9 @@ export class GameScene extends Phaser.Scene {
     return new Phaser.Math.Vector2(x, y);
   }
 
-  private destroyPlanet(planet: Planet) {
-    planet.destroy();
-  }
-
   private setColliders() {
     this.physics.add.overlap(this.planets.map(p => p.object), this.solarSystem.sunObject, this.onSunCollide, undefined, this);
     this.physics.add.collider(this.planets.map(p => p.object), this.planets.map(p => p.object));
-   // this.physics.add.collider(this.planets.map(p => p.object), this.astroids.map(a => a.asteroid));
   }
 
   private onSunCollide(planetObject: Phaser.GameObjects.GameObject) {
@@ -141,7 +145,7 @@ export class GameScene extends Phaser.Scene {
 
   private updatePlanets() {
     this.planets.forEach((p) => {
-      if (this.peer.state.isHost) {
+      if (this.gamePeer.isHost) {
         p.update();
       }
 
@@ -150,7 +154,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handleDestroyedPlanets() {
-    this.planetsMarkedForDestruction.forEach((p) => this.destroyPlanet(p));
+    this.planetsMarkedForDestruction.forEach((p) => p.destroy());
     this.planetsMarkedForDestruction = [];
     if (!this.winnerId) {
       this.handleGameOverIfOnePlanetLeft();
@@ -172,118 +176,6 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  private sendStartIfHost() {
-    if (this.peer.state.isHost) {
-      this.peer.send("start", this.getPayload());
-    }
-  }
-
-  private sendNewIfHost() {
-    if (this.peer.state.isHost) {
-      this.peer.send("new", this.getPayload());
-    }
-  }
-
-  private sendUpdate() {
-    this.peer.send("update", this.getPayload());
-  }
-
-  private getPayload = () => {
-    return this.peer.state.isHost
-      ? this.getHostPayload()
-      : this.getConnectionPayload();
-  };
-
-  private getHostPayload = () => {
-    return {
-      planets: this.planets.map((p) => ({
-        id: p.id,
-        name: p.name,
-        destroyed: p.destroyed,
-        position: { x: p.object.body.position.x, y: p.object.body.position.y },
-        velocity: { x: p.object.body.velocity.x, y: p.object.body.velocity.y },
-      })),
-    };
-  };
-
-  private getConnectionPayload = () => {
-    return {
-      planets: [
-        {
-          id: this.playerPlanet!.id,
-          name: this.playerPlanet!.name,
-          input: this.playerPlanet!.input,
-        },
-      ],
-    };
-  };
-
-  private subscribeToStream() {
-    this.peer.stream.subscribe((message) => {
-      const map = new Map(
-        Object.entries({
-          start: this.handleStartMessage.bind(this),
-          update: this.handleUpdateMessage.bind(this),
-          gameOver: this.handleGameOverMessage.bind(this),
-          new: this.handleNewGameMessage.bind(this),
-        })
-      );
-
-      map.get(message.type)?.(message.data);
-    });
-  }
-
-  private handleStartMessage(data: any) {
-    data.planets.forEach((p: any, i: number) => {
-      const planet = this.createPlanet(p.id);
-      if (planet.id === this.peer.peer.id) {
-        this.playerPlanet = planet;
-        this.playerPlanet.setTint(0x85c2ff);
-        this.playerPlanet.setName(this.playerFormStoreState.state.value.name);
-      }
-    });
-    this.handleUpdateMessage(data);
-  }
-
-  private handleUpdateMessage(data: any) {
-    data.planets.forEach((p: any, i: number) => {
-      const planet = this.planets.find(
-        (checkedPlanet) => checkedPlanet.id === p.id
-      );
-
-      if (planet) {
-        if (!this.peer.state.isHost) {
-          planet.setPosition(p.position.x, p.position.y);
-          planet.object.setVelocity(p.velocity.x, p.velocity.y);
-
-          if (planet.id !== this.playerPlanet?.id) {
-            planet.setName(p.name);
-          }
-
-          if (p.destroyed && !planet.destroyed) {
-            this.destroyPlanet(planet!);
-          } else if (planet.destroyed && !p.destroyed) {
-            planet.destroyed = p.destroyed;
-          }
-        } else {
-          planet.input = p.input;
-          planet.setName(p.name);
-        }
-      }
-    });
-  }
-
-  private handleGameOverMessage(data: any) {
-    this.onGameOver(data.winnerId);
-  }
-
-  private handleNewGameMessage(data: any) {
-    this.winnerId = undefined;
-    this.solarSystem.reset();
-    this.planets.forEach((p) => p.object.setVelocity(0));
-    this.handleUpdateMessage(data);
-  }
-
   private handleGameOverIfOnePlanetLeft = () => {
     const remainingPlanets = this.planets.filter((p) => !p.destroyed);
     if (remainingPlanets.length === 1) {
@@ -294,14 +186,8 @@ export class GameScene extends Phaser.Scene {
   private onHostGameOver(planet: Planet) {
     this.onGameOver(planet.id);
     this.planets.forEach((p) => p.object.setVelocity(0));
-    this.peer.send("gameOver", { winnerId: planet.id });
-    this.newGameTimer = this.time.delayedCall(1200, () => this.startNewGame(), undefined, this);
-  }
-
-  private onGameOver(planetId: string) {
-    this.setWinnerId(planetId);
-    this.solarSystem.pauseShrink();
-    this.planets.forEach(p => p.onGameOver());
+    this.gamePeer.sendGameOver(planet);
+    this.newGameTimer = this.time.delayedCall(1200, () => this.hostStartNewGame(), undefined, this);
   }
 
   private updatePublicGameState() {
