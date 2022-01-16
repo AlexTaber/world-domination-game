@@ -95,8 +95,14 @@ export class GameScene extends Phaser.Scene {
         );
       });
 
-      const aiPlanet = this.createPlanet("ai");
-      aiPlanet.isAi = true;
+      let aiPlanet = this.createPlanet("ai");
+      aiPlanet.setIsAi();
+
+      aiPlanet = this.createPlanet("ai2");
+      aiPlanet.setIsAi();
+
+      aiPlanet = this.createPlanet("ai3");
+      aiPlanet.setIsAi();
     }
   }
 
@@ -309,6 +315,9 @@ export class GameScene extends Phaser.Scene {
   private onGameOver(planetId: string) {
     this.setWinnerId(planetId);
     this.solarSystem.pauseShrink();
+    this.planets.forEach(p => {
+      if (p.isAi) p.onGameOver();
+    });
   }
 
   private updatePublicGameState() {

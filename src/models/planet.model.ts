@@ -42,11 +42,12 @@ export class Planet {
     this.object.body.setCircle(size);
     this.object.setScale(0.4);
     this.object.setData("planet", this);
-    this.object.setBounce(1.3);
+    this.object.setBounce(1.4);
     this.object.setDrag(200);
     this.object.setAlpha(1);
     this.object.setTint(0xff0000);
     this.object.body.setOffset(210, 210);
+    this.object.setMass(1);
     this.setPosition(this.position.x, this.position.y);
 
     this.emitter.startFollow(this.object);
@@ -58,6 +59,11 @@ export class Planet {
   public setName(name: string) {
     this.name = name;
     this.nameLabel.text = name;
+  }
+
+  public setIsAi() {
+    this.isAi = true;
+    this.object.setMass(0.8);
   }
 
   public update() {
@@ -80,7 +86,7 @@ export class Planet {
     this.object.setDrag(0);
     const x = Math.cos(Phaser.Math.DegToRad(direction)) * this.maxVelocity;
     const y = Math.sin(Phaser.Math.DegToRad(direction)) * this.maxVelocity;
-    this.object.body.velocity.lerp(new Phaser.Math.Vector2(x, y), 0.03);
+    this.object.body.velocity.lerp(new Phaser.Math.Vector2(x, y), this.isAi ? 0.035 : 0.03);
   }
 
   public setPosition(x: number, y: number) {
@@ -88,6 +94,10 @@ export class Planet {
       x + this.object.body.width / 2,
       y + this.object.body.height / 2
     );
+  }
+
+  public onGameOver() {
+    if (this.isAi) this.ai.reset();
   }
 
   public destroy() {
