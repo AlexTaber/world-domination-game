@@ -47,7 +47,6 @@ export class GameScene extends Phaser.Scene {
     this.inputService = new GameInputService(this);
     this.setSolarSystem();
     this.createPlanetsIfHost();
-    // this.createAsteroids();
     this.setColliders();
     this.subscribeToStream();
     this.sendStartIfHost();
@@ -88,9 +87,7 @@ export class GameScene extends Phaser.Scene {
   private createPlanetsIfHost() {
     if (this.peer.state.isHost) {
       if (!this.lobby.state.value.aiOnly) {
-        this.playerPlanet = this.createPlanet(this.peer.peer.id);
-        this.playerPlanet.emitter.setTint(0x85c2ff);
-        this.playerPlanet.object.setTint(0x85c2ff);
+        this.playerPlanet = this.createPlanet(this.peer.peer.id, { tint: 0x85c2ff });
         this.playerPlanet.setName(this.playerFormStoreState.state.value.name);
         this.playerPlanet.isHost = true;
       }
@@ -117,15 +114,6 @@ export class GameScene extends Phaser.Scene {
     this.planets.push(planet);
     this.stats.addPlanet(planet.id);
     return planet;
-  }
-
-  private createAsteroids() {
-    const numberOfAsteriods = Math.floor((Math.random() * 4) + 1); // random number between 1-3
-
-    for (let x = 0; x < numberOfAsteriods ; x++) {
-      const astroid = new Asteroid(this,this.getPlanetInitialPosition(this.planets.length+numberOfAsteriods + x))
-      this.astroids.push(astroid)
-    }
   }
 
   private getPlanetInitialPosition(index: number) {
@@ -252,8 +240,7 @@ export class GameScene extends Phaser.Scene {
       const planet = this.createPlanet(p.id);
       if (planet.id === this.peer.peer.id) {
         this.playerPlanet = planet;
-        this.playerPlanet.emitter.setTint(0x85c2ff);
-        this.playerPlanet.object.setTint(0x85c2ff);
+        this.playerPlanet.setTint(0x85c2ff);
         this.playerPlanet.setName(this.playerFormStoreState.state.value.name);
         planet.isHost = true;
       }

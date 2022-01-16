@@ -3,6 +3,8 @@ import { GameScene } from "../scenes/Game";
 import { AI, BaseAI } from "../ai/base.ai";
 
 export interface PlanetOptions {
+  name?: string;
+  tint?: number;
   ai?: typeof BaseAI;
 }
 
@@ -16,9 +18,9 @@ export class Planet {
   public object: Phaser.Physics.Arcade.Sprite;
   public destroyed = false;
   public input: PlanetInput = { direction: undefined, throttle: 1 };
-  public name = getRandomPlanetName();
-  public image = "bananas";
+  public name;
   public emitter: Phaser.GameObjects.Particles.ParticleEmitter;
+  public tint: number;
 
   private maxVelocity = 1000;
   private nameLabel: Phaser.GameObjects.Text;
@@ -30,12 +32,15 @@ export class Planet {
     private position: Phaser.Math.Vector2,
     options: PlanetOptions,
   ) {
+    this.tint = options.tint || 0xff0000;
+    this.name = options.name || getRandomPlanetName();
+
     this.emitter = this.scene.planetParticles.createEmitter({
       alpha: { start: 1, end: 0 },
       scale: 0.5,
       lifespan: 200,
       blendMode: 'ADD',
-      tint: 0xFF0000,
+      tint: this.tint,
       frequency: 10,
     });
 
@@ -52,7 +57,7 @@ export class Planet {
     this.object.setBounce(1.4);
     this.object.setDrag(200);
     this.object.setAlpha(1);
-    this.object.setTint(0xff0000);
+    this.object.setTint(this.tint);
     this.object.body.setOffset(210, 210);
     this.object.setMass(1);
     this.setPosition(this.position.x, this.position.y);
@@ -68,6 +73,12 @@ export class Planet {
   public setName(name: string) {
     this.name = name;
     this.nameLabel.text = name;
+  }
+
+  public setTint(tint: number) {
+    this.tint = tint;
+    this.emitter.setTint(tint);
+    this.object.setTint(tint);
   }
 
   public update() {
