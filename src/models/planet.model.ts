@@ -83,9 +83,10 @@ export class Planet {
   }
 
   public move(direction: number) {
+    const velocity = this.isAi ? this.maxVelocity * 0.85 : this.maxVelocity;
     this.object.setDrag(0);
-    const x = Math.cos(Phaser.Math.DegToRad(direction)) * this.maxVelocity;
-    const y = Math.sin(Phaser.Math.DegToRad(direction)) * this.maxVelocity;
+    const x = Math.cos(Phaser.Math.DegToRad(direction)) * velocity;
+    const y = Math.sin(Phaser.Math.DegToRad(direction)) * velocity;
     this.object.body.velocity.lerp(new Phaser.Math.Vector2(x, y), this.isAi ? 0.035 : 0.03);
   }
 

@@ -1,5 +1,5 @@
 <template>
-  <form>
+  <form @submit.prevent="">
     <input :value="state.name" :default="state.name" @change="handleChange" />
   </form>
 </template>
