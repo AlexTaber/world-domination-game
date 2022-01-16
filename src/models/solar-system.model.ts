@@ -2,7 +2,7 @@ import { GameScene } from "../scenes/Game";
 import { useCanvas } from "../services/canvas.service"
 
 export class SolarSystem {
-  public sunObject: Phaser.Physics.Arcade.Sprite;
+  public sunObject!: Phaser.Physics.Arcade.Sprite;
   public diameter: number;
 
   private canvas = useCanvas();
@@ -10,6 +10,7 @@ export class SolarSystem {
 
   private shrinkTimer: Phaser.Time.TimerEvent;
   private shrinkTimerConfig: Phaser.Types.Time.TimerEventConfig;
+  private isShrinking = false;
 
   constructor(
     private scene: GameScene
@@ -17,23 +18,14 @@ export class SolarSystem {
     const position = this.canvas.getCenter();
     this.diameter = this.canvas.getPercentageHeight(95);
 
-    // const background = this.scene.add.image(400, 300, "background");
-    // background.setScale(1.1);
     this.orbitSpace = this.scene.add.circle(position.x, position.y, this.radius, 0xffffff, 0.06);
 
-    this.sunObject = this.scene.physics.add.sprite(position.x, position.y, "sun");
-    this.sunObject.setScale(0.7);
-    this.sunObject.setOrigin(0.5, 0.5);
-    const sizeOfSun = 40;
-    this.sunObject.body.setOffset((this.sunObject.body.width / 2) - sizeOfSun, (this.sunObject.body.width / 2) - sizeOfSun);
-    this.sunObject.body.setCircle(sizeOfSun);
+    this.setSun(position);
 
     this.shrinkTimerConfig = {
-      callback: this.shrink,
+      callback: () => this.isShrinking = true,
       callbackScope: this,
-      delay: 700,  // ms
-      loop: true,
-      startAt: -9 * 1000  // negative value for startup delay (ms)
+      delay: 2000,
     };
     this.shrinkTimer = this.scene.time.addEvent(this.shrinkTimerConfig);
   }
@@ -42,15 +34,32 @@ export class SolarSystem {
     return this.diameter / 2;
   }
 
+  public update() {
+    if (this.isShrinking) {
+      this.shrink();
+    }
+  }
+
   public reset() {
     this.diameter = this.canvas.getPercentageHeight(95);
     this.orbitSpace.setRadius(this.radius);
+    this.isShrinking = false;
 
-    this.shrinkTimer.reset(this.shrinkTimerConfig);
+    this.shrinkTimer.destroy();
+    this.shrinkTimer = this.scene.time.addEvent(this.shrinkTimerConfig);
   }
 
-  private shrink(ratio: number = 0.99) {
-    if (this.diameter > this.sunObject.body.width) {
+  private setSun(position: { x: number, y: number }) {
+    this.sunObject = this.scene.physics.add.sprite(position.x, position.y, "sun");
+    this.sunObject.setScale(0.7);
+    this.sunObject.setOrigin(0.5, 0.5);
+    const sizeOfSun = 40;
+    this.sunObject.body.setOffset((this.sunObject.body.width / 2) - sizeOfSun, (this.sunObject.body.width / 2) - sizeOfSun);
+    this.sunObject.body.setCircle(sizeOfSun);
+  }
+
+  private shrink(ratio: number = 0.9995) {
+    if (this.diameter > this.sunObject.body.width * 5) {
       this.diameter *= ratio;
       this.orbitSpace.setRadius(this.radius);
     }

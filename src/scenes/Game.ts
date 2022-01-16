@@ -49,6 +49,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   public update() {
+    this.solarSystem.update();
     this.inputService?.update();
     this.updatePlanets();
 
@@ -80,8 +81,8 @@ export class GameScene extends Phaser.Scene {
   private createPlanetsIfHost() {
     if (this.peer.state.isHost) {
       this.playerPlanet = this.createPlanet(this.peer.peer.id);
-      this.playerPlanet.emitter.setTint(0xffffff);
-      this.playerPlanet.object.setTint(0xffffff);
+      this.playerPlanet.emitter.setTint(0x85c2ff);
+      this.playerPlanet.object.setTint(0x85c2ff);
       this.playerPlanet.setName(this.playerFormStoreState.state.value.name);
       this.playerPlanet.isHost = true;
 
@@ -235,8 +236,8 @@ export class GameScene extends Phaser.Scene {
       const planet = this.createPlanet(p.id);
       if (planet.id === this.peer.peer.id) {
         this.playerPlanet = planet;
-        this.playerPlanet.emitter.setTint(0xffffff);
-        this.playerPlanet.object.setTint(0xffffff);
+        this.playerPlanet.emitter.setTint(0x85c2ff);
+        this.playerPlanet.object.setTint(0x85c2ff);
         this.playerPlanet.setName(this.playerFormStoreState.state.value.name);
         planet.isHost = true;
       }
