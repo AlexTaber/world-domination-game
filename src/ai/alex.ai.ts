@@ -29,17 +29,15 @@ export class AlexAI extends BaseAI implements AI {
     this.state = this.getDefaultState();
   }
 
-  public getInput() {
+  public update() {
     this.state.framesRemaining --;
     if (this.state.framesRemaining <= 0) {
       this.state.framesRemaining = this.getRandomDecisionTime();
       this.state.mode = Math.random() > 0.5 ? "attack" : "evade";
       this.state.data.target = undefined;
     }
-    return {
-      direction: this.state.mode === "attack" ? this.attack() : this.evade(),
-      throttle: 0.85,
-    };
+
+    this.planet.input = this.state.mode === "attack" ? this.attack() : this.evade();
   }
 
   public reset() {
@@ -67,20 +65,26 @@ export class AlexAI extends BaseAI implements AI {
     const center = this.canvas.getCenter();
     const targetPosition = this.state.data.target!.object.body.position;
     const playerAngleToPlanet = Phaser.Math.Angle.Between(targetPosition.x, targetPosition.y, center.x, center.y);
-    const dis = this.game.solarSystem.diameter * 0.25;
-    const dir = playerAngleToPlanet + Phaser.Math.DegToRad(45);
+    const dis = this.game.solarSystem.diameter * 0.28;
+    const dir = playerAngleToPlanet + Phaser.Math.DegToRad(45); // offset helps prevent ai from running into sun after switching from evade mode -> attack mode
     const target = {
       x: center.x + Math.cos(dir) * dis,
       y: center.y + Math.sin(dir) * dis,
     };
 
-    return this.getDirectionToPoint(target);
+    return {
+      direction: this.getDirectionToPoint(target),
+      throttle: 0.85,
+    };
   }
 
   private attack() {
     this.setTargetPlanet();
     const targetPosition = this.state.data.target!.object.body.position;
-    return this.getDirectionToPoint(targetPosition);
+    return {
+      direction: this.getDirectionToPoint(targetPosition),
+      throttle: 1,
+    };
   }
 
   private setTargetPlanet() {

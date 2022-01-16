@@ -9,9 +9,9 @@ export class ExampleAI extends BaseAI implements AI {
     super(planet, game);
   }
 
-  public getInput() {
+  public update() {
     // will slowly accelerate to the right. think you can do better :)
-    return {
+    this.planet.input = {
       direction: 0,
       throttle: 0.1,
     };

@@ -72,9 +72,7 @@ export class Planet {
 
   public update() {
     if (!this.destroyed && !this.scene.winnerId) {
-      if (this.ai) {
-        this.input = this.ai.getInput();
-      }
+      this.ai?.update();
 
       if (this.input.direction != undefined) {
         this.move(this.input);

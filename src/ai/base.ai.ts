@@ -3,7 +3,7 @@ import { GameScene } from "../scenes/Game";
 
 export interface AI {
   name: string;
-  getInput(): PlanetInput;
+  update(): void;
   reset(): void;
 }
 

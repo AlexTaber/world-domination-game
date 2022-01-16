@@ -3,7 +3,7 @@ import Phaser from 'phaser';
 export const config = {
   type: Phaser.AUTO,
   parent: 'game',
-  backgroundColor: '#100c08',
+  transparent: true,
   physics: {
     default: 'arcade',
     arcade: {
