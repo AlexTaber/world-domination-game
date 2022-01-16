@@ -1,5 +1,5 @@
 <template>
-  <div class="gameMenu">
+  <div class="navigation">
     <button @click="onClick">Return to Lobby</button>
   </div>
 </template>
@@ -11,3 +11,12 @@ const router = useRouter();
 
 const onClick = () => router.push({ name: "Home" });
 </script>
+
+<style scoped>
+.navigation {
+  position: fixed;
+  right: 80px;
+  top: 50px;
+  z-index: 1;
+}
+</style>

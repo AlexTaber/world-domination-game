@@ -1,10 +1,13 @@
 <template>
+  <Navigation />
+
   <router-view v-if="peerId" />
 </template>
 
 <script setup lang="ts">
 import { Ref, ref } from "vue";
 import { usePeer } from "./services/peer.service";
+import Navigation from "./components/Navigation.vue";
 
 const { open } = usePeer();
 

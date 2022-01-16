@@ -1,8 +1,6 @@
 <template>
   <Leaderboard class="leaderboard" />
 
-  <GameMenu class="gameMenu" />
-
   <div class="gameContainer">
     <div class="gameWrapper">
       <div v-if="winner" class="gameOverOverlay">
@@ -19,7 +17,6 @@ import { onMounted, onUnmounted, computed } from "vue";
 import { useGameFactory } from "../factories/game.factory";
 import WinnerScreen from "./WinnerScreen.vue";
 import Leaderboard from "./Leaderboard.vue";
-import GameMenu from "./GameMenu.vue";
 import { usePublicGameState } from "../services/public-game-state.service";
 
 const { state } = usePublicGameState();
@@ -39,13 +36,6 @@ onUnmounted(() => game?.destroy(true, false));
 .leaderboard {
   position: fixed;
   left: 80px;
-  top: 50px;
-  z-index: 1;
-}
-
-.gameMenu {
-  position: fixed;
-  right: 80px;
   top: 50px;
   z-index: 1;
 }
