@@ -23,7 +23,7 @@
       >
     </div>
 
-    <button @click="navigateToGame">Start Game</button>
+    <button :disabled="state.playerCount + state.aiBots <= 1" @click="navigateToGame">Start Game</button>
   </div>
 </template>
 

@@ -52,7 +52,7 @@ export const usePlanetAi = (planet: Planet, game: GameScene) => {
     const targetPosition = state.data.target!.object.body.position;
     const playerAngleToPlanet = Phaser.Math.Angle.Between(targetPosition.x, targetPosition.y, center.x, center.y);
     const dis = game.solarSystem.diameter * 0.25;
-    const dir = playerAngleToPlanet + Phaser.Math.DegToRad(30);
+    const dir = playerAngleToPlanet + Phaser.Math.DegToRad(45);
     const target = {
       x: center.x + Math.cos(dir) * dis,
       y: center.y + Math.sin(dir) * dis,
