@@ -126,7 +126,7 @@ export class GameScene extends Phaser.Scene {
 
   private getPlanetInitialPosition(index: number) {
     const dir = index * 135;
-    const dis = this.solarSystem.diameter * 0.3;
+    const dis = this.solarSystem.maxDiameter * 0.3;
     const center = this.canvas.getCenter();
     const x = center.x + Math.cos(Phaser.Math.DegToRad(dir)) * dis;
     const y = center.y + Math.sin(Phaser.Math.DegToRad(dir)) * dis;
@@ -134,7 +134,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private setColliders() {
-    this.physics.add.overlap(this.planets.map(p => p.object), this.solarSystem.sunObject, this.onSunCollide, undefined, this);
+    // this.physics.add.overlap(this.planets.map(p => p.object), this.solarSystem.sunObject, this.onSunCollide, undefined, this);
     this.physics.add.collider(this.planets.map(p => p.object), this.planets.map(p => p.object));
   }
 

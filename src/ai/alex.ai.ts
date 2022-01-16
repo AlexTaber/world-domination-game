@@ -65,7 +65,7 @@ export class AlexAI extends BaseAI implements AI {
     const center = this.canvas.getCenter();
     const targetPosition = this.state.data.target!.object.body.position;
     const playerAngleToPlanet = Phaser.Math.Angle.Between(targetPosition.x, targetPosition.y, center.x, center.y);
-    const dis = this.game.solarSystem.diameter * 0.28;
+    const dis = this.game.solarSystem.diameter * 0.24;
     const dir = playerAngleToPlanet + Phaser.Math.DegToRad(45); // offset helps prevent ai from running into sun after switching from evade mode -> attack mode
     const target = {
       x: center.x + Math.cos(dir) * dis,

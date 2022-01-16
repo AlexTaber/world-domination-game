@@ -4,6 +4,7 @@ import { useCanvas } from "../services/canvas.service"
 export class SolarSystem {
   public sunObject!: Phaser.Physics.Arcade.Sprite;
   public diameter: number;
+  public maxDiameter;
 
   private canvas = useCanvas();
   private orbitSpace;
@@ -16,7 +17,8 @@ export class SolarSystem {
     private scene: GameScene
   ) {
     const position = this.canvas.getCenter();
-    this.diameter = this.canvas.getPercentageHeight(95);
+    this.maxDiameter = this.canvas.getPercentageHeight(95);
+    this.diameter = this.maxDiameter;
 
     this.orbitSpace = this.scene.add.circle(position.x, position.y, this.radius, 0xffffff, 0.06);
 
@@ -45,7 +47,7 @@ export class SolarSystem {
   }
 
   public reset() {
-    this.diameter = this.canvas.getPercentageHeight(95);
+    this.diameter = this.maxDiameter;
     this.orbitSpace.setRadius(this.radius);
     this.isShrinking = false;
 
@@ -62,7 +64,7 @@ export class SolarSystem {
     this.sunObject.body.setCircle(sizeOfSun);
   }
 
-  private shrink(ratio: number = 0.9995) {
+  private shrink(ratio: number = 0.999) {
     this.diameter *= ratio;
     this.orbitSpace.setRadius(this.radius);
   }
