@@ -63,9 +63,7 @@ export class SolarSystem {
   }
 
   private shrink(ratio: number = 0.9995) {
-    if (this.diameter > this.sunObject.body.width * 5) {
-      this.diameter *= ratio;
-      this.orbitSpace.setRadius(this.radius);
-    }
+    this.diameter *= ratio;
+    this.orbitSpace.setRadius(this.radius);
   }
 }

@@ -1,4 +1,4 @@
-import { GameScene } from "src/scenes/Game";
+import { GameScene } from "../scenes/Game";
 import { Planet } from "../models/planet.model";
 import { useCanvas } from "./canvas.service";
 import { shuffle } from "lodash";

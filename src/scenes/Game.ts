@@ -8,6 +8,7 @@ import { GameInputService } from '../services/game-input.service';
 import { usePeer } from '../services/peer.service';
 import { usePublicGameState } from '../services/public-game-state.service';
 import { useStats } from "../services/stats.service";
+import { useLobby } from "../services/lobby.service";
 
 export class GameScene extends Phaser.Scene {
   public planetParticles!: Phaser.GameObjects.Particles.ParticleEmitterManager;
@@ -20,6 +21,7 @@ export class GameScene extends Phaser.Scene {
   private peer = usePeer();
   private canvas = useCanvas();
   private stats = useStats();
+  private lobby = useLobby();
   private publicGameState = usePublicGameState();
   private playerFormStoreState = usePlayerFormState();
   private inputService?: GameInputService;
@@ -95,14 +97,10 @@ export class GameScene extends Phaser.Scene {
         );
       });
 
-      let aiPlanet = this.createPlanet("ai");
-      aiPlanet.setIsAi();
-
-      aiPlanet = this.createPlanet("ai2");
-      aiPlanet.setIsAi();
-
-      aiPlanet = this.createPlanet("ai3");
-      aiPlanet.setIsAi();
+      Array.from({ length: this.lobby.state.value.aiBots }, (x, i) => {
+        const aiPlanet = this.createPlanet(`ai${i + 1}`);
+        aiPlanet.setIsAi();
+      });
     }
   }
 
