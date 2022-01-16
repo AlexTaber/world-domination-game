@@ -14,6 +14,10 @@ open((id: string) => peerId.value = id);
 </script>
 
 <style>
+* {
+  box-sizing: border-box;
+}
+
 body {
   background: #100c08;
 }

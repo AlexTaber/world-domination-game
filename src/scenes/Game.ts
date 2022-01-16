@@ -1,5 +1,5 @@
 import { usePlayerFormState } from "../services/player-form.service";
-import Phaser, { Game } from 'phaser';
+import Phaser from 'phaser';
 import { useCanvas } from '../services/canvas.service';
 import { Planet } from '../models/planet.model';
 import { SolarSystem } from '../models/solar-system.model';
@@ -94,6 +94,9 @@ export class GameScene extends Phaser.Scene {
           conn.peer,
         );
       });
+
+      const aiPlanet = this.createPlanet("ai");
+      aiPlanet.isAi = true;
     }
   }
 

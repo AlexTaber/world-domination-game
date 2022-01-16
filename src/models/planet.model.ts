@@ -1,7 +1,9 @@
 import { getRandomPlanetName } from "../services/planet-name.generator";
 import { GameScene } from "../scenes/Game";
+import { usePlanetAi } from "../services/planet-ai.service";
 
 export class Planet {
+  public isAi = false;
   public isHost = false;
   public object: Phaser.Physics.Arcade.Sprite;
   public destroyed = false;
@@ -12,12 +14,15 @@ export class Planet {
 
   private maxVelocity = 1000;
   private nameLabel: Phaser.GameObjects.Text;
+  private ai: ReturnType<typeof usePlanetAi>;
 
   constructor(
     public id: string,
     private scene: GameScene,
     private position: Phaser.Math.Vector2
   ) {
+    this.ai = usePlanetAi(this, this.scene);
+
     this.emitter = this.scene.planetParticles.createEmitter({
       alpha: { start: 1, end: 0 },
       scale: 0.5,
@@ -56,8 +61,15 @@ export class Planet {
   }
 
   public update() {
-    if (this.inputDirection != undefined && !this.destroyed && !this.scene.winnerId)
-      this.move(this.inputDirection);
+    if (!this.destroyed && !this.scene.winnerId) {
+      if (this.isAi) {
+        this.inputDirection = this.ai.getMoveDirection();
+      }
+
+      if (this.inputDirection != undefined) {
+        this.move(this.inputDirection);
+      }
+    }
   }
 
   public updateNamePosition() {
