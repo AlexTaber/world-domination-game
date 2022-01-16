@@ -89,7 +89,6 @@ export class GameScene extends Phaser.Scene {
       if (!this.lobby.state.value.aiOnly) {
         this.playerPlanet = this.createPlanet(this.peer.peer.id, { tint: 0x85c2ff });
         this.playerPlanet.setName(this.playerFormStoreState.state.value.name);
-        this.playerPlanet.isHost = true;
       }
 
       this.peer.state.connections.forEach((conn) => {
@@ -235,14 +234,12 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handleStartMessage(data: any) {
-    // create new planet instance with planet id
     data.planets.forEach((p: any, i: number) => {
       const planet = this.createPlanet(p.id);
       if (planet.id === this.peer.peer.id) {
         this.playerPlanet = planet;
         this.playerPlanet.setTint(0x85c2ff);
         this.playerPlanet.setName(this.playerFormStoreState.state.value.name);
-        planet.isHost = true;
       }
     });
     this.handleUpdateMessage(data);

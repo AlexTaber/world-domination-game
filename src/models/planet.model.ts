@@ -14,7 +14,6 @@ export interface PlanetInput {
 }
 
 export class Planet {
-  public isHost = false;
   public object: Phaser.Physics.Arcade.Sprite;
   public destroyed = false;
   public input: PlanetInput = { direction: undefined, throttle: 1 };
