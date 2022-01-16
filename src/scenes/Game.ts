@@ -60,9 +60,9 @@ export class GameScene extends Phaser.Scene {
     if (this.gamePeer.isHost) {
       this.handlePlanetsLeftOrbit();
       this.handleDestroyedPlanets();
-      this.gamePeer.sendUpdate();
     }
 
+    this.gamePeer.sendUpdate();
     this.updatePublicGameState();
   }
 
