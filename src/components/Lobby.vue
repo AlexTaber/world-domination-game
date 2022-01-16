@@ -23,7 +23,18 @@
       >
     </div>
 
-    <button :disabled="state.playerCount + state.aiBots <= 1" @click="navigateToGame">Start Game</button>
+    <div>
+      <label for="AI Only">AI Only</label>
+
+      <input
+        name="AI Bots"
+        type="checkbox"
+        :value="state.aiOnly"
+        @change="update({ aiOnly: !state.aiOnly })"
+      >
+    </div>
+
+    <button :disabled="totalPlayers <= 1" @click="navigateToGame">Start Game</button>
   </div>
 </template>
 
@@ -31,7 +42,7 @@
 import { Subscription } from "rxjs";
 import { usePeer } from "../services/peer.service";
 import { useLobby } from "../services/lobby.service";
-import { onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import NewPlayerForm from "./NewPlayerForm.vue";
 
@@ -44,6 +55,11 @@ const route = useRoute();
 const router = useRouter();
 
 let subscription: Subscription | undefined;
+
+const totalPlayers = computed(() =>{
+  const { aiOnly, playerCount, aiBots } = state.value;
+  return aiOnly ? aiBots : aiBots + playerCount;
+})
 
 onMounted(() => connectAndSubscribe());
 

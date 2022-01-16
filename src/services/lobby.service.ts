@@ -4,11 +4,13 @@ import { ref } from "vue";
 interface LobbyState {
   playerCount: number;
   aiBots: number;
+  aiOnly: boolean;
 }
 
-const state = ref({
+const state = ref<LobbyState>({
   playerCount: 1,
   aiBots: 3,
+  aiOnly: false,
 });
 
 export const useLobby = () => {

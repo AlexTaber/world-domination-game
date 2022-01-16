@@ -2,6 +2,7 @@ import { Planet, PlanetInput } from "../models/planet.model";
 import { GameScene } from "../scenes/Game";
 
 export interface AI {
+  name: string;
   getInput(): PlanetInput;
   reset(): void;
 }

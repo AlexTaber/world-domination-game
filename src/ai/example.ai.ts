@@ -3,6 +3,8 @@ import { GameScene } from "../scenes/Game";
 import { AI, BaseAI } from "./base.ai";
 
 export class ExampleAI extends BaseAI implements AI {
+  public name = "Example AI";
+
   constructor(planet: Planet, game: GameScene) {
     super(planet, game);
   }

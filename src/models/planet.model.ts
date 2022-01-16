@@ -1,7 +1,10 @@
 import { getRandomPlanetName } from "../services/planet-name.generator";
 import { GameScene } from "../scenes/Game";
-import { AI } from "../ai/base.ai";
-import { AlexAI } from "../ai/alex.ai";
+import { AI, BaseAI } from "../ai/base.ai";
+
+export interface PlanetOptions {
+  ai?: typeof BaseAI;
+}
 
 export interface PlanetInput {
   direction?: number;
@@ -9,7 +12,6 @@ export interface PlanetInput {
 }
 
 export class Planet {
-  public isAi = false;
   public isHost = false;
   public object: Phaser.Physics.Arcade.Sprite;
   public destroyed = false;
@@ -20,15 +22,14 @@ export class Planet {
 
   private maxVelocity = 1000;
   private nameLabel: Phaser.GameObjects.Text;
-  private ai: AI;
+  private ai?: AI;
 
   constructor(
     public id: string,
     private scene: GameScene,
-    private position: Phaser.Math.Vector2
+    private position: Phaser.Math.Vector2,
+    options: PlanetOptions,
   ) {
-    this.ai = new AlexAI(this, this.scene);
-
     this.emitter = this.scene.planetParticles.createEmitter({
       alpha: { start: 1, end: 0 },
       scale: 0.5,
@@ -60,6 +61,8 @@ export class Planet {
 
     this.nameLabel = this.scene.add.text(position.x, position.y, this.name);
     this.nameLabel.setOrigin(0.5);
+
+    this.setAI(options.ai);
   }
 
   public setName(name: string) {
@@ -67,14 +70,9 @@ export class Planet {
     this.nameLabel.text = name;
   }
 
-  public setIsAi() {
-    this.isAi = true;
-    this.object.setMass(0.8);
-  }
-
   public update() {
     if (!this.destroyed && !this.scene.winnerId) {
-      if (this.isAi) {
+      if (this.ai) {
         this.input = this.ai.getInput();
       }
 
@@ -93,7 +91,7 @@ export class Planet {
     this.object.setDrag(0);
     const x = Math.cos(Phaser.Math.DegToRad(input.direction!)) * velocity;
     const y = Math.sin(Phaser.Math.DegToRad(input.direction!)) * velocity;
-    this.object.body.velocity.lerp(new Phaser.Math.Vector2(x, y), this.isAi ? 0.035 : 0.03);
+    this.object.body.velocity.lerp(new Phaser.Math.Vector2(x, y), 0.03);
   }
 
   public setPosition(x: number, y: number) {
@@ -104,7 +102,7 @@ export class Planet {
   }
 
   public onGameOver() {
-    if (this.isAi) this.ai.reset();
+    this.ai?.reset();
   }
 
   public destroy() {
@@ -112,5 +110,13 @@ export class Planet {
     this.object.setPosition(-10000000);
     this.object.setVelocity(0);
     console.log("DEATH");
+  }
+
+  private setAI(ai: typeof BaseAI | undefined) {
+    if (ai) {
+      this.ai = new ai(this, this.scene) as unknown as AI;
+      this.setName(this.ai.name);
+      this.object.setMass(0.8);
+    }
   }
 }

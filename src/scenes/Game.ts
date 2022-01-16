@@ -1,7 +1,7 @@
 import { usePlayerFormState } from "../services/player-form.service";
 import Phaser from 'phaser';
 import { useCanvas } from '../services/canvas.service';
-import { Planet } from '../models/planet.model';
+import { Planet, PlanetOptions } from '../models/planet.model';
 import { SolarSystem } from '../models/solar-system.model';
 import { Asteroid } from '../models/asteroid.model';
 import { GameInputService } from '../services/game-input.service';
@@ -9,11 +9,12 @@ import { usePeer } from '../services/peer.service';
 import { usePublicGameState } from '../services/public-game-state.service';
 import { useStats } from "../services/stats.service";
 import { useLobby } from "../services/lobby.service";
+import { useAISelector } from "../services/ai.selector";
 
 export class GameScene extends Phaser.Scene {
   public planetParticles!: Phaser.GameObjects.Particles.ParticleEmitterManager;
   public solarSystem!: SolarSystem;
-  public playerPlanet!: Planet;
+  public playerPlanet?: Planet;
   public winnerId?: string = undefined;
   public planets: Planet[] = [];
   public astroids: Asteroid[] = [];
@@ -22,6 +23,7 @@ export class GameScene extends Phaser.Scene {
   private canvas = useCanvas();
   private stats = useStats();
   private lobby = useLobby();
+  private aiSelector = useAISelector();
   private publicGameState = usePublicGameState();
   private playerFormStoreState = usePlayerFormState();
   private inputService?: GameInputService;
@@ -85,11 +87,13 @@ export class GameScene extends Phaser.Scene {
 
   private createPlanetsIfHost() {
     if (this.peer.state.isHost) {
-      this.playerPlanet = this.createPlanet(this.peer.peer.id);
-      this.playerPlanet.emitter.setTint(0x85c2ff);
-      this.playerPlanet.object.setTint(0x85c2ff);
-      this.playerPlanet.setName(this.playerFormStoreState.state.value.name);
-      this.playerPlanet.isHost = true;
+      if (!this.lobby.state.value.aiOnly) {
+        this.playerPlanet = this.createPlanet(this.peer.peer.id);
+        this.playerPlanet.emitter.setTint(0x85c2ff);
+        this.playerPlanet.object.setTint(0x85c2ff);
+        this.playerPlanet.setName(this.playerFormStoreState.state.value.name);
+        this.playerPlanet.isHost = true;
+      }
 
       this.peer.state.connections.forEach((conn) => {
         this.createPlanet(
@@ -98,17 +102,17 @@ export class GameScene extends Phaser.Scene {
       });
 
       Array.from({ length: this.lobby.state.value.aiBots }, (x, i) => {
-        const aiPlanet = this.createPlanet(`ai${i + 1}`);
-        aiPlanet.setIsAi();
+        const aiPlanet = this.createPlanet(`ai${i + 1}`, { ai: this.aiSelector.getAI() });
       });
     }
   }
 
-  private createPlanet(id: string) {
+  private createPlanet(id: string, options: PlanetOptions = {}) {
     const planet = new Planet(
       id,
       this,
-      this.getPlanetInitialPosition(this.planets.length)
+      this.getPlanetInitialPosition(this.planets.length),
+      options,
     );
     this.planets.push(planet);
     this.stats.addPlanet(planet.id);
@@ -219,9 +223,9 @@ export class GameScene extends Phaser.Scene {
     return {
       planets: [
         {
-          id: this.playerPlanet.id,
-          name: this.playerPlanet.name,
-          input: this.playerPlanet.input,
+          id: this.playerPlanet!.id,
+          name: this.playerPlanet!.name,
+          input: this.playerPlanet!.input,
         },
       ],
     };
@@ -268,7 +272,7 @@ export class GameScene extends Phaser.Scene {
           planet.setPosition(p.position.x, p.position.y);
           planet.object.setVelocity(p.velocity.x, p.velocity.y);
 
-          if (planet.id !== this.playerPlanet.id) {
+          if (planet.id !== this.playerPlanet?.id) {
             planet.setName(p.name);
           }
 
@@ -313,9 +317,7 @@ export class GameScene extends Phaser.Scene {
   private onGameOver(planetId: string) {
     this.setWinnerId(planetId);
     this.solarSystem.pauseShrink();
-    this.planets.forEach(p => {
-      if (p.isAi) p.onGameOver();
-    });
+    this.planets.forEach(p => p.onGameOver());
   }
 
   private updatePublicGameState() {

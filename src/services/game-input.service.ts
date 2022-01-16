@@ -25,32 +25,34 @@ export class GameInputService {
   }
 
   private handleMovementInput() {
-    let direction = undefined;
-    if (!this.scene.playerPlanet.destroyed && !this.scene.winnerId) {
-      if (this.right?.isDown) {
-        if (this.up?.isDown) {
-          direction = 315;
+    if (this.scene.playerPlanet) {
+      let direction = undefined;
+      if (!this.scene.playerPlanet.destroyed && !this.scene.winnerId) {
+        if (this.right?.isDown) {
+          if (this.up?.isDown) {
+            direction = 315;
+          } else if (this.down?.isDown) {
+            direction = 45;
+          } else {
+            direction = 0;
+          }
+        } else if (this.left?.isDown) {
+          if (this.up?.isDown) {
+            direction = 225;
+          } else if (this.down?.isDown) {
+            direction = 135;
+          } else {
+            direction = 180;
+          }
+        } else if (this.up?.isDown) {
+          direction = 270;
         } else if (this.down?.isDown) {
-          direction = 45;
-        } else {
-          direction = 0;
+          direction = 90;
         }
-      } else if (this.left?.isDown) {
-        if (this.up?.isDown) {
-          direction = 225;
-        } else if (this.down?.isDown) {
-          direction = 135;
-        } else {
-          direction = 180;
-        }
-      } else if (this.up?.isDown) {
-        direction = 270;
-      } else if (this.down?.isDown) {
-        direction = 90;
       }
-    }
 
-    this.scene.playerPlanet.input = { direction, throttle: 1 };
+      this.scene.playerPlanet.input = { direction, throttle: 1 };
+    }
   }
 
   private handleStartNewGameInput() {

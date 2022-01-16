@@ -17,6 +17,8 @@ interface AlexAIData {
 }
 
 export class AlexAI extends BaseAI implements AI {
+  public name = "Alex AI";
+
   private canvas = useCanvas();
 
   private state: AlexAIState;
