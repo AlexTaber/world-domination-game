@@ -35,7 +35,7 @@ onUnmounted(() => game?.destroy(true, false));
 <style>
 .leaderboard {
   position: fixed;
-  left: 50px;
+  left: 80px;
   top: 50px;
   z-index: 1;
 }

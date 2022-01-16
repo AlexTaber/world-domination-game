@@ -47,6 +47,7 @@ export class Planet {
     this.emitter.startFollow(this.object);
 
     this.nameLabel = this.scene.add.text(position.x, position.y, this.name);
+    this.nameLabel.setOrigin(0.5);
   }
 
   public setName(name: string) {
@@ -60,7 +61,7 @@ export class Planet {
   }
 
   public updateNamePosition() {
-    this.nameLabel.setPosition(this.object.body.position.x, this.object.body.position.y - 20);
+    this.nameLabel.setPosition(this.object.body.position.x + (this.object.body.width * 0.5), this.object.body.position.y - 20);
   }
 
   public move(direction: number) {
