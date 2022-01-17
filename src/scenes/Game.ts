@@ -107,6 +107,10 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  public close() {
+    window.location.href = "/";
+  }
+
   private setSolarSystem() {
     this.solarSystem = new SolarSystem(this);
   }
@@ -210,9 +214,5 @@ export class GameScene extends Phaser.Scene {
   private setWinnerId(winnerId: string) {
     this.winnerId = winnerId;
     this.stats.incrementPlanetWins(winnerId);
-  }
-
-  private close() {
-    window.location.href = "/";
   }
 }

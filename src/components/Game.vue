@@ -18,8 +18,11 @@ import { useGameFactory } from "../factories/game.factory";
 import WinnerScreen from "./WinnerScreen.vue";
 import Leaderboard from "./Leaderboard.vue";
 import { usePublicGameState } from "../services/public-game-state.service";
+import { usePeer } from "../services/peer.service";
 
 const { state } = usePublicGameState();
+
+const { clearConnections } = usePeer();
 
 const winner = computed(() => state.value.winner);
 
@@ -29,7 +32,10 @@ let game: Phaser.Game | undefined = undefined;
 
 onMounted(() => (game = createGame()));
 
-onUnmounted(() => game?.destroy(true, false));
+onUnmounted(() => {
+  clearConnections();
+  game?.destroy(true, false);
+});
 </script>
 
 <style>

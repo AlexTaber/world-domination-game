@@ -22,6 +22,7 @@ export const useGamePeer = (game: GameScene) => {
           gameOver: handleGameOverMessage,
           new: handleNewGameMessage,
           disconnection: handleDisconnection,
+          close: handleClose,
         })
       );
 
@@ -130,6 +131,8 @@ export const useGamePeer = (game: GameScene) => {
       send("disconnection", peerId);
     }
   }
+
+  const handleClose = () => game.close();
 
   return {
     peerId: peer.id,
