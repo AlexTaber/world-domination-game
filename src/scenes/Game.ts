@@ -102,7 +102,7 @@ export class GameScene extends Phaser.Scene {
   public removePlanet(id: string) {
     const planet = this.planets.find(p => p.id === id);
     if (planet) {
-      this.planets.splice(this.planets.findIndex(p => p.id === id, 1));
+      this.planets.splice(this.planets.findIndex(p => p.id === id), 1);
       planet.clean();
     }
   }

@@ -132,7 +132,11 @@ export const useGamePeer = (game: GameScene) => {
     }
   }
 
-  const handleClose = () => game.close();
+  const handleClose = () => {
+    if (!peerState.isHost) {
+      game.close();
+    }
+  }
 
   return {
     peerId: peer.id,

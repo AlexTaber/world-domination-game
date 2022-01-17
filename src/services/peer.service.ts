@@ -34,7 +34,7 @@ export const usePeer = () => {
       connection.on("data", (message) => stream.next(message));
 
       connection.on("close", () => {
-        state.connections.splice(state.connections.findIndex(i => i.peer === connection.peer, 1));
+        state.connections.splice(state.connections.findIndex(i => i.peer === connection.peer), 1);
         stream.next({ type: "disconnection", data: connection.peer });
       });
     });
