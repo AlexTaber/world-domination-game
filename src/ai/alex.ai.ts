@@ -1,4 +1,5 @@
 import { shuffle } from "lodash";
+import { getRandomWeighted, WeightedRandomItem } from "../utils/random-utils";
 import { Planet } from "../models/planet.model";
 import { GameScene } from "../scenes/Game";
 import { useCanvas } from "../services/canvas.service";
@@ -23,6 +24,20 @@ export class AlexAI extends BaseAI implements AI {
 
   private state: AlexAIState;
 
+  private modeMap = new Map(
+    Object.entries({
+      attack: this.attack.bind(this),
+      evade: this.evade.bind(this),
+      mirror: this.mirror.bind(this),
+    })
+  );
+
+  private weightedModes = [
+    { value: "attack", weight: 0.45 },
+    { value: "evade", weight: 0.3 },
+    { value: "mirror", weight: 0.25 },
+  ] as WeightedRandomItem<AlexAIMode>[];
+
   constructor(planet: Planet, game: GameScene) {
     super(planet, game);
 
@@ -33,11 +48,11 @@ export class AlexAI extends BaseAI implements AI {
     this.state.framesRemaining --;
     if (this.state.framesRemaining <= 0) {
       this.state.framesRemaining = this.getRandomDecisionTime();
-      this.state.mode = Math.random() > 0.5 ? "attack" : "evade";
+      this.state.mode = this.getRandomMode();
       this.state.data.target = undefined;
     }
 
-    this.planet.input = this.state.mode === "attack" ? this.attack() : this.evade();
+    this.planet.input = this.modeMap.get(this.state.mode)?.() || this.attack();
   }
 
   public reset() {
@@ -53,7 +68,7 @@ export class AlexAI extends BaseAI implements AI {
   }
 
   private getRandomMode() {
-    return (Math.random() > 0.5 ? "attack" : "evade") as AlexAIMode;
+    return getRandomWeighted(this.weightedModes);
   }
 
   private getRandomDecisionTime() {
@@ -65,11 +80,29 @@ export class AlexAI extends BaseAI implements AI {
     const center = this.canvas.getCenter();
     const targetPosition = this.state.data.target!.object.body.position;
     const playerAngleToPlanet = Phaser.Math.Angle.Between(targetPosition.x, targetPosition.y, center.x, center.y);
-    const dis = this.game.solarSystem.diameter * 0.24;
+    const dis = this.game.solarSystem.diameter * 0.2;
     const dir = playerAngleToPlanet;
     const target = {
       x: center.x + Math.cos(dir) * dis,
       y: center.y + Math.sin(dir) * dis,
+    };
+
+    return {
+      direction: this.getDirectionToPoint(target),
+      throttle: 0.85,
+    };
+  }
+
+  private mirror() {
+    this.setTargetPlanet();
+    const center = this.canvas.getCenter();
+    const targetPosition = this.state.data.target!.object.body.position;
+    const playerAngleToPlanet = Phaser.Math.Angle.Between(targetPosition.x, targetPosition.y, center.x, center.y);
+    const dis = this.game.solarSystem.diameter * 0.15;
+    const dir = playerAngleToPlanet;
+    const target = {
+      x: center.x + Math.cos(dir) * dis,
+      y: center.y - Math.sin(dir) * dis,
     };
 
     return {
