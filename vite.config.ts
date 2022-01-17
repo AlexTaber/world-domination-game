@@ -9,9 +9,9 @@ export default defineConfig({
   //   },
   // },
 
-  // define: {
-  //   "process.env": {},
-  // },
+  define: {
+    "process.env": {},
+  },
   plugins: [vuePlugin()],
   build: {
     rollupOptions: {
