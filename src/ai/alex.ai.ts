@@ -11,7 +11,7 @@ interface AlexAIState {
   framesRemaining: number;
 }
 
-type AlexAIMode = "attack" | "evade";
+type AlexAIMode = "attack" | "evade" | "mirror";
 
 interface AlexAIData {
   target?: Planet;

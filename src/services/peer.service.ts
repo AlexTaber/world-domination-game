@@ -2,7 +2,7 @@ import Peer, { DataConnection } from "peerjs";
 
 import { ReplaySubject } from "rxjs";
 
-type MessageType = "connection" | "start" | "update" | "gameOver" | "new";
+type MessageType = "connection" | "start" | "update" | "gameOver" | "new" | "disconnection";
 
 export interface Message {
   type: MessageType;
@@ -19,6 +19,10 @@ let state = {
 
 const stream = new ReplaySubject<Message>();
 
+window.onbeforeunload = () => {
+  state.connection?.close();
+};
+
 export const usePeer = () => {
   const open = (callback: (id: string) => void) => {
     peer.on("open", callback);
@@ -29,7 +33,8 @@ export const usePeer = () => {
       connection.on("data", (message) => stream.next(message));
 
       connection.on("close", () => {
-        console.log("disconnect!");
+        state.connections.splice(state.connections.findIndex(i => i.peer === connection.peer, 1));
+        stream.next({ type: "disconnection", data: connection.peer });
       });
     });
   }

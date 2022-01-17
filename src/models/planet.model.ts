@@ -119,6 +119,12 @@ export class Planet {
     this.object.setVelocity(0);
   }
 
+  public clean() {
+    this.destroy();
+    this.object.destroy();
+    this.nameLabel.destroy();
+  }
+
   private setAI(ai: typeof BaseAI | undefined) {
     if (ai) {
       this.ai = new ai(this, this.scene) as unknown as AI;

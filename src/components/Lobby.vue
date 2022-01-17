@@ -74,7 +74,11 @@ const connectAndSubscribe = () => {
 const subscribe = () => {
   subscription = stream.subscribe((message) => {
     if (message.type === "connection") {
-      update({ playerCount: message.data });
+      update({ playerCount: peerState.connections.length + 1 });
+    }
+
+    if (message.type === "disconnection") {
+      update({ playerCount: peerState.connections.length + 1 });
     }
 
     if (message.type === "start") {

@@ -99,6 +99,14 @@ export class GameScene extends Phaser.Scene {
     this.planets.forEach(p => p.onGameOver());
   }
 
+  public removePlanet(id: string) {
+    const planet = this.planets.find(p => p.id === id);
+    if (planet) {
+      this.planets.splice(this.planets.findIndex(p => p.id === id, 1));
+      planet.clean();
+    }
+  }
+
   private setSolarSystem() {
     this.solarSystem = new SolarSystem(this);
   }
@@ -187,7 +195,12 @@ export class GameScene extends Phaser.Scene {
     this.onGameOver(planet.id);
     this.planets.forEach((p) => p.object.setVelocity(0));
     this.gamePeer.sendGameOver(planet);
-    this.newGameTimer = this.time.delayedCall(1200, () => this.hostStartNewGame(), undefined, this);
+    this.newGameTimer = this.time.delayedCall(
+      1200,
+      () => this.planets.length > 1 ? this.hostStartNewGame() : this.close(),
+      undefined,
+      this
+    );
   }
 
   private updatePublicGameState() {
@@ -197,5 +210,9 @@ export class GameScene extends Phaser.Scene {
   private setWinnerId(winnerId: string) {
     this.winnerId = winnerId;
     this.stats.incrementPlanetWins(winnerId);
+  }
+
+  private close() {
+    window.location.href = "/";
   }
 }

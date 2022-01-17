@@ -21,6 +21,7 @@ export const useGamePeer = (game: GameScene) => {
           update: handleUpdateMessage,
           gameOver: handleGameOverMessage,
           new: handleNewGameMessage,
+          disconnection: handleDisconnection,
         })
       );
 
@@ -121,7 +122,15 @@ export const useGamePeer = (game: GameScene) => {
     game.planets.forEach((p) => p.object.setVelocity(0));
     handleUpdateMessage(data);
   }
-  
+
+  const handleDisconnection = (peerId: string) => {
+    game.removePlanet(peerId);
+
+    if (peerState.isHost) {
+      send("disconnection", peerId);
+    }
+  }
+
   return {
     peerId: peer.id,
     isHost: peerState.isHost,
