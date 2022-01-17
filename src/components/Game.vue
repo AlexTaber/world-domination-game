@@ -37,6 +37,7 @@ onMounted(() => checkConnectionAndCreateGame());
 
 onUnmounted(() => {
   clearConnections();
+  game?.scene.scenes[0]?.unsubscribe();
   game?.destroy(true, false);
 });
 

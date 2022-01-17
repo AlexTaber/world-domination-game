@@ -1,3 +1,4 @@
+import { Subscription } from "rxjs";
 import { Planet } from "../models/planet.model";
 import { GameScene } from "../scenes/Game";
 import { diff } from "../utils/diff";
@@ -15,9 +16,10 @@ export const useGamePeer = (game: GameScene) => {
   const { state: formState } = usePlayerFormState();
 
   let prevGuestPayload: any = {};
+  let sub: Subscription | undefined;
 
   const subscribe = () => {
-    stream.subscribe((message) => {
+    sub = stream.subscribe((message) => {
       const map = new Map(
         Object.entries({
           start: handleStartMessage,
@@ -33,6 +35,8 @@ export const useGamePeer = (game: GameScene) => {
       map.get(message.type)?.(message.data);
     });
   }
+
+  const unsubscribe = () => sub?.unsubscribe();
 
   const sendStartIfHost = () => {
     if (peerState.isHost) {
@@ -164,6 +168,7 @@ export const useGamePeer = (game: GameScene) => {
     isHost: peerState.isHost,
     connections: peerState.connections,
     subscribe,
+    unsubscribe,
     sendStartIfHost,
     sendNew,
     sendUpdate,

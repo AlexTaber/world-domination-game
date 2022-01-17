@@ -25,7 +25,7 @@ let state = {
   connection: undefined as DataConnection | undefined,
 };
 
-const stream = new ReplaySubject<Message>();
+const stream = new ReplaySubject<Message>(undefined, 2000);
 
 window.onbeforeunload = () => {
   state.connections.forEach(conn => conn.close());

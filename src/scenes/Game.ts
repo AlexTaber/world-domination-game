@@ -111,6 +111,10 @@ export class GameScene extends Phaser.Scene {
     window.location.href = "/";
   }
 
+  public unsubscribe() {
+    this.gamePeer.unsubscribe();
+  }
+
   private setSolarSystem() {
     this.solarSystem = new SolarSystem(this);
   }

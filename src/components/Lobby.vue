@@ -68,7 +68,6 @@ onUnmounted(() => subscription?.unsubscribe());
 const connectAndSubscribe = () => {
   peerState.isHost ? clearConnections() : connect(route.params.gameId as string);
   subscribe();
-  console.log(peerState.connection);
 };
 
 const subscribe = () => {
