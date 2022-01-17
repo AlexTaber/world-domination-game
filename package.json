@@ -7,9 +7,9 @@
     "name": "Aivan Monceller"
   },
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "dev": "vite"
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
   },
   "main": "dist/index.js",
   "dependencies": {
