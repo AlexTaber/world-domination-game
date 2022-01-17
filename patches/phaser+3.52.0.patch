@@ -1,0 +1,13 @@
+diff --git a/node_modules/phaser/dist/phaser.js b/node_modules/phaser/dist/phaser.js
+index c2e9cce..71a02a7 100644
+--- a/node_modules/phaser/dist/phaser.js
++++ b/node_modules/phaser/dist/phaser.js
+@@ -152941,7 +152941,7 @@ Item.prototype.run = function () {
+ };
+ process.title = 'browser';
+ process.browser = true;
+-process.env = {};
++// process.env = {};
+ process.argv = [];
+ process.version = ''; // empty string to avoid regexp issues
+ process.versions = {};

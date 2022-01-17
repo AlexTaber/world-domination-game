@@ -8,9 +8,10 @@ export default defineConfig({
   //     port: 443,
   //   },
   // },
-  define: {
-    "process.env": {},
-  },
+
+  // define: {
+  //   "process.env": {},
+  // },
   plugins: [vuePlugin()],
   build: {
     rollupOptions: {

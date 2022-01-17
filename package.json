@@ -9,14 +9,18 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "postinstall": "patch-package",
+    "heroku-cleanup": "patch-package"
   },
   "main": "dist/index.js",
   "dependencies": {
     "@types/lodash": "^4.14.178",
     "@vitejs/plugin-vue": "^2.0.1",
     "lodash": "^4.17.21",
+    "patch-package": "^6.4.7",
     "peerjs": "^1.3.2",
+    "postinstall-postinstall": "^2.1.0",
     "rxjs": "^7.5.2",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0"
