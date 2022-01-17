@@ -19,10 +19,13 @@ import WinnerScreen from "./WinnerScreen.vue";
 import Leaderboard from "./Leaderboard.vue";
 import { usePublicGameState } from "../services/public-game-state.service";
 import { usePeer } from "../services/peer.service";
+import { useRouter } from "vue-router";
 
 const { state } = usePublicGameState();
 
-const { clearConnections } = usePeer();
+const { state: peerState, clearConnections } = usePeer();
+
+const router = useRouter();
 
 const winner = computed(() => state.value.winner);
 
@@ -30,12 +33,21 @@ const { createGame } = useGameFactory();
 
 let game: Phaser.Game | undefined = undefined;
 
-onMounted(() => (game = createGame()));
+onMounted(() => checkConnectionAndCreateGame());
 
 onUnmounted(() => {
   clearConnections();
   game?.destroy(true, false);
 });
+
+const checkConnectionAndCreateGame = () => {
+  const hasValidConnection = peerState.isHost || peerState.connection;
+  hasValidConnection ? setGame() : redirectHome();
+}
+
+const setGame = () => game = createGame();
+
+const redirectHome = () => router.push({ name: "Home" });
 </script>
 
 <style>
