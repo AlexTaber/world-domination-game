@@ -1,5 +1,6 @@
 import { Planet } from "../models/planet.model";
 import { GameScene } from "../scenes/Game";
+import { diff } from "../utils/diff";
 import { usePeer } from "./peer.service";
 import { usePlayerFormState } from "./player-form.service";
 
@@ -13,12 +14,15 @@ export const useGamePeer = (game: GameScene) => {
 
   const { state: formState } = usePlayerFormState();
 
+  let prevGuestPayload: any = {};
+
   const subscribe = () => {
     stream.subscribe((message) => {
       const map = new Map(
         Object.entries({
           start: handleStartMessage,
-          update: handleUpdateMessage,
+          hostUpdate: handleHostUpdateMessage,
+          guestUpdate: handleGuestUpdateMessage,
           gameOver: handleGameOverMessage,
           new: handleNewGameMessage,
           disconnection: handleDisconnection,
@@ -32,21 +36,17 @@ export const useGamePeer = (game: GameScene) => {
 
   const sendStartIfHost = () => {
     if (peerState.isHost) {
-      send("start", getPayload());
+      send("start", getHostPayload());
     }
   };
 
-  const sendNew = () => send("new", getPayload());
+  const sendNew = () => send("new", getHostPayload());
 
-  const sendUpdate = () => send("update", getPayload());
+  const sendUpdate = () => peerState.isHost ? sendHostUpdate() : sendGuestUpdate();
 
   const sendGameOver = (planet: Planet) => send("gameOver", { winnerId: planet.id });
 
-  const getPayload = () => {
-    return peerState.isHost
-      ? getHostPayload()
-      : getConnectionPayload();
-  };
+  const sendHostUpdate = () => send("hostUpdate", getHostPayload());
 
   const getHostPayload = () => {
     return {
@@ -60,15 +60,29 @@ export const useGamePeer = (game: GameScene) => {
     };
   };
 
-  const getConnectionPayload = () => {
+  const sendGuestUpdate = () => {
+    const fullPayload = getGuestPayload();
+    const payloadDiff = diff(fullPayload, prevGuestPayload);
+    const payload = payloadDiff.reduce(
+      (payload, key) => ({
+        ...payload,
+        [key]: fullPayload[key as keyof typeof fullPayload],
+      }),
+      {} as any
+    );
+
+    if (Object.keys(payload).length > 0) {
+      send("guestUpdate", { id: game.playerPlanet!.id, ...payload });
+    }
+
+    prevGuestPayload = fullPayload;
+  }
+
+  const getGuestPayload = () => {
     return {
-      planets: [
-        {
-          id: game.playerPlanet!.id,
-          name: game.playerPlanet!.name,
-          input: game.playerPlanet!.input,
-        },
-      ],
+      id: game.playerPlanet!.id,
+      name: game.playerPlanet!.name,
+      input: game.playerPlanet!.input,
     };
   };
 
@@ -82,35 +96,41 @@ export const useGamePeer = (game: GameScene) => {
       }
     });
 
-    handleUpdateMessage(data);
+    handleGuestUpdateMessage(data);
   }
 
-  const handleUpdateMessage = (data: any) => {
+  const handleHostUpdateMessage = (data: any) => {
     data.planets.forEach((p: any, i: number) => {
       const planet = game.planets.find(
         (checkedPlanet) => checkedPlanet.id === p.id
       );
 
       if (planet) {
-        if (!peerState.isHost) {
-          planet.setPosition(p.position.x, p.position.y);
-          planet.object.setVelocity(p.velocity.x, p.velocity.y);
+        planet.setPosition(p.position.x, p.position.y);
+        planet.object.setVelocity(p.velocity.x, p.velocity.y);
 
-          if (planet.id !== game.playerPlanet?.id) {
-            planet.setName(p.name);
-          }
-
-          if (p.destroyed && !planet.destroyed) {
-            planet!.destroy();
-          } else if (planet.destroyed && !p.destroyed) {
-            planet.destroyed = p.destroyed;
-          }
-        } else {
-          planet.input = p.input;
+        if (planet.id !== game.playerPlanet?.id) {
           planet.setName(p.name);
+        }
+
+        if (p.destroyed && !planet.destroyed) {
+          planet!.destroy();
+        } else if (planet.destroyed && !p.destroyed) {
+          planet.destroyed = p.destroyed;
         }
       }
     });
+  }
+
+  const handleGuestUpdateMessage = (data: any) => {
+    const planet = game.planets.find(
+      (checkedPlanet) => checkedPlanet.id === data.id
+    );
+
+    if (planet) {
+      if (data.name) planet.setName(data.name);
+      if (data.input) planet.input = data.input;
+    }
   }
 
   const handleGameOverMessage = (data: any) => {
@@ -121,7 +141,8 @@ export const useGamePeer = (game: GameScene) => {
     game.winnerId = undefined;
     game.solarSystem.reset();
     game.planets.forEach((p) => p.object.setVelocity(0));
-    handleUpdateMessage(data);
+    prevGuestPayload = {};
+    handleGuestUpdateMessage(data);
   }
 
   const handleDisconnection = (peerId: string) => {

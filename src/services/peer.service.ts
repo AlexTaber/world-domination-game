@@ -2,7 +2,15 @@ import Peer, { DataConnection } from "peerjs";
 
 import { ReplaySubject } from "rxjs";
 
-type MessageType = "connection" | "start" | "update" | "gameOver" | "new" | "disconnection" | "close";
+type MessageType = 
+  "connection" |
+  "start" |
+  "hostUpdate" |
+  "guestUpdate" |
+  "gameOver" |
+  "new" |
+  "disconnection" |
+  "close";
 
 export interface Message {
   type: MessageType;
