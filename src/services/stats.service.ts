@@ -1,5 +1,5 @@
-import { arrayUpdateItemByProperty } from "../utils/array-utils";
 import { ref } from "vue";
+import { usePeer } from "./peer.service";
 
 interface StatsState {
   planets: Record<string, PlanetStats>;
@@ -16,6 +16,8 @@ const state = ref<StatsState>({
 });
 
 export const useStats = () => {
+  const { state: peerState, send } = usePeer();
+
   const addPlanet = (planetId: string ) => {
     const planets = { ...state.value.planets, [planetId]: { score: 0, wins: 0, kills: 0 } };
     update({ planets });
@@ -39,6 +41,9 @@ export const useStats = () => {
     const existingStats = state.value.planets[planetId];
     const planets = { ...state.value.planets, [planetId]: { ...existingStats, ...stats } };
     update({ planets });
+    if (peerState.isHost) {
+      send("updateStats", { id: planetId, diff: stats });
+    }
   }
 
   const update = (diff: Partial<StatsState>) => {

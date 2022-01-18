@@ -9,7 +9,8 @@ import { usePublicGameState } from '../services/public-game-state.service';
 import { useStats } from "../services/stats.service";
 import { useLobby } from "../services/lobby.service";
 import { useAISelector } from "../services/ai.selector";
-import { useGamePeer } from "../services/game-peer.service";
+import { useMessageSender } from "../services/message.sender";
+import { useMessageHandler } from "../services/message.handler";
 
 export class GameScene extends Phaser.Scene {
   public planetParticles!: Phaser.GameObjects.Particles.ParticleEmitterManager;
@@ -19,7 +20,8 @@ export class GameScene extends Phaser.Scene {
   public planets: Planet[] = [];
   public astroids: Asteroid[] = [];
 
-  private gamePeer = useGamePeer(this);
+  private messageHandler = useMessageHandler(this);
+  private messageSender = useMessageSender(this);
   private canvas = useCanvas();
   private stats = useStats();
   private lobby = useLobby();
@@ -48,8 +50,8 @@ export class GameScene extends Phaser.Scene {
     this.setSolarSystem();
     this.createPlanetsIfHost();
     this.setColliders();
-    this.gamePeer.subscribe();
-    this.gamePeer.sendStartIfHost();
+    this.messageHandler.subscribe();
+    this.messageSender.sendStartIfHost();
   }
 
   public update() {
@@ -57,12 +59,12 @@ export class GameScene extends Phaser.Scene {
     this.inputService?.update();
     this.updatePlanets();
 
-    if (this.gamePeer.isHost) {
+    if (this.messageSender.isHost) {
       this.handlePlanetsLeftOrbit();
       this.handleDestroyedPlanets();
     }
 
-    this.gamePeer.sendUpdate();
+    this.messageSender.sendUpdate();
     this.updatePublicGameState();
   }
 
@@ -76,7 +78,7 @@ export class GameScene extends Phaser.Scene {
       p.destroyed = false;
     });
 
-    this.gamePeer.sendNew();
+    this.messageSender.sendNew();
     this.solarSystem.reset();
     this.newGameTimer?.destroy();
   }
@@ -94,7 +96,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   public destroyPlanet(planet: Planet) {
-    if (this.gamePeer.isHost && planet.lastContact && this.time.now - planet.lastContact.time < 500) {
+    if (this.messageSender.isHost && planet.lastContact && this.time.now - planet.lastContact.time < 500) {
       this.stats.incrementPlanetKills(planet.lastContact.id);
     }
 
@@ -120,7 +122,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   public unsubscribe() {
-    this.gamePeer.unsubscribe();
+    this.messageHandler.unsubscribe();
   }
 
   private setSolarSystem() {
@@ -128,15 +130,15 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createPlanetsIfHost() {
-    if (this.gamePeer.isHost) {
+    if (this.messageSender.isHost) {
       if (!this.lobby.state.value.aiOnly) {
-        this.playerPlanet = this.createPlanet(this.gamePeer.peerId, {
+        this.playerPlanet = this.createPlanet(this.messageSender.peerId, {
           tint: 0x85c2ff,
           name: this.playerFormStoreState.state.value.name
         });
       }
 
-      this.gamePeer.connections.forEach((conn) => {
+      this.messageSender.connections.forEach((conn) => {
         this.createPlanet(
           conn.peer,
         );
@@ -167,7 +169,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private onPlanetCollision(pObj1: Phaser.GameObjects.GameObject, pObj2: Phaser.GameObjects.GameObject) {
-    if (this.gamePeer.isHost) {
+    if (this.messageSender.isHost) {
       const p1 = pObj1.getData("planet") as Planet;
       const p2 = pObj2.getData("planet") as Planet;
       const time = this.time.now;
@@ -178,7 +180,7 @@ export class GameScene extends Phaser.Scene {
 
   private updatePlanets() {
     this.planets.forEach((p) => {
-      if (this.gamePeer.isHost) {
+      if (this.messageSender.isHost) {
         p.update();
       }
 
@@ -219,7 +221,7 @@ export class GameScene extends Phaser.Scene {
   private onHostGameOver(planet: Planet) {
     this.onGameOver(planet.id);
     this.planets.forEach((p) => p.object.setVelocity(0));
-    this.gamePeer.sendGameOver(planet);
+    this.messageSender.sendGameOver(planet);
     this.newGameTimer = this.time.delayedCall(
       1200,
       () => this.planets.length > 1 ? this.hostStartNewGame() : this.close(),
@@ -234,7 +236,7 @@ export class GameScene extends Phaser.Scene {
 
   private setWinnerId(winnerId: string) {
     this.winnerId = winnerId;
-    if (this.gamePeer.isHost) {
+    if (this.messageSender.isHost) {
       this.stats.incrementPlanetWins(winnerId);
     }
   }
