@@ -10,7 +10,8 @@ type MessageType =
   "gameOver" |
   "new" |
   "disconnection" |
-  "close";
+  "close" |
+  "updateStats";
 
 export interface Message {
   type: MessageType;

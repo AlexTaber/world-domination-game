@@ -5,7 +5,7 @@ interface StatsState {
   planets: Record<string, PlanetStats>;
 }
 
-interface PlanetStats {
+export interface PlanetStats {
   score: number;
   wins: number;
   kills: number;
@@ -50,5 +50,6 @@ export const useStats = () => {
     addPlanet,
     incrementPlanetWins,
     incrementPlanetKills,
+    updatePlanetStats,
   };
 };

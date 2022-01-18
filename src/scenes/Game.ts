@@ -94,10 +94,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   public destroyPlanet(planet: Planet) {
-    if (this.gamePeer.isHost) {
-      if (planet.lastContact && this.time.now - planet.lastContact.time < 500) {
-        this.stats.incrementPlanetKills(planet.lastContact.id);
-      }
+    if (this.gamePeer.isHost && planet.lastContact && this.time.now - planet.lastContact.time < 500) {
+      this.stats.incrementPlanetKills(planet.lastContact.id);
     }
 
     planet.destroy();

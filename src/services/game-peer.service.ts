@@ -4,6 +4,7 @@ import { GameScene } from "../scenes/Game";
 import { diff } from "../utils/diff";
 import { usePeer } from "./peer.service";
 import { usePlayerFormState } from "./player-form.service";
+import { PlanetStats, useStats } from "./stats.service";
 
 export const useGamePeer = (game: GameScene) => {
   const {
@@ -14,6 +15,8 @@ export const useGamePeer = (game: GameScene) => {
   } = usePeer();
 
   const { state: formState } = usePlayerFormState();
+
+  const { updatePlanetStats } = useStats();
 
   let prevGuestPayload: any = {};
   let sub: Subscription | undefined;
@@ -29,6 +32,7 @@ export const useGamePeer = (game: GameScene) => {
           new: handleNewGameMessage,
           disconnection: handleDisconnection,
           close: handleClose,
+          updateStats: handleUpdateStats,
         })
       );
 
@@ -51,6 +55,8 @@ export const useGamePeer = (game: GameScene) => {
   const sendGameOver = (planet: Planet) => send("gameOver", { winnerId: planet.id });
 
   const sendHostUpdate = () => send("hostUpdate", getHostPayload());
+
+  const sendUpdateStats = (id: string, diff: Partial<PlanetStats>) => send("updateStats", { id, diff });
 
   const getHostPayload = () => {
     return {
@@ -163,6 +169,10 @@ export const useGamePeer = (game: GameScene) => {
     }
   }
 
+  const handleUpdateStats = (data: any) => {
+    updatePlanetStats(data.id, data.diff);
+  }
+
   return {
     peerId: peer.id,
     isHost: peerState.isHost,
@@ -173,5 +183,6 @@ export const useGamePeer = (game: GameScene) => {
     sendNew,
     sendUpdate,
     sendGameOver,
+    sendUpdateStats,
   };
 }
