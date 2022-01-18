@@ -3,12 +3,6 @@ import replace from "@rollup/plugin-replace";
 import vuePlugin from "@vitejs/plugin-vue";
 
 export default defineConfig({
-  // server: {
-  //   hmr: {
-  //     port: 443,
-  //   },
-  // },
-
   define: {
     "process.env": {},
   },

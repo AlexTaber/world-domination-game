@@ -13,6 +13,11 @@ export interface PlanetInput {
   throttle: number;
 }
 
+export interface PlanetContact {
+  id: string;
+  time: number;
+};
+
 export class Planet {
   public object: Phaser.Physics.Arcade.Sprite;
   public destroyed = false;
@@ -20,6 +25,7 @@ export class Planet {
   public name;
   public emitter: Phaser.GameObjects.Particles.ParticleEmitter;
   public tint: number;
+  public lastContact?: PlanetContact;
 
   private maxVelocity = 1000;
   private nameLabel: Phaser.GameObjects.Text;
@@ -111,11 +117,13 @@ export class Planet {
 
   public onGameOver() {
     this.ai?.reset();
+    this.lastContact = undefined;
   }
 
   public destroy() {
+    const index = this.scene.planets.findIndex(p => p.id === this.id);
     this.destroyed = true;
-    this.object.setPosition(-10000000);
+    this.object.setPosition(-10000000, index * 1000);
     this.object.setVelocity(0);
   }
 

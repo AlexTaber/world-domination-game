@@ -6,7 +6,9 @@ interface StatsState {
 }
 
 interface PlanetStats {
+  score: number;
   wins: number;
+  kills: number;
 }
 
 const state = ref<StatsState>({
@@ -15,18 +17,27 @@ const state = ref<StatsState>({
 
 export const useStats = () => {
   const addPlanet = (planetId: string ) => {
-    const planets = { ...state.value.planets, [planetId]: { wins: 0 } };
+    const planets = { ...state.value.planets, [planetId]: { score: 0, wins: 0, kills: 0 } };
     update({ planets });
   }
 
   const incrementPlanetWins = (planetId: string) => {
-    const currentWins = state.value.planets[planetId]?.wins || 0;
-    updatePlanetStats(planetId, { wins: currentWins + 1 });
+    const currentStats = state.value.planets[planetId];
+    if (currentStats) {
+      updatePlanetStats(planetId, { wins: currentStats.wins + 1, score: currentStats.score + 1 });
+    }
+  }
+
+  const incrementPlanetKills = (planetId: string) => {
+    const currentStats = state.value.planets[planetId];
+    if (currentStats) {
+      updatePlanetStats(planetId, { kills: currentStats.kills + 1, score: currentStats.score + 1 });
+    }
   }
 
   const updatePlanetStats = (planetId: string, stats: Partial<PlanetStats>) => {
-    const exisitingStats = state.value.planets[planetId];
-    const planets = { ...state.value.planets, [planetId]: { ...exisitingStats, ...stats } };
+    const existingStats = state.value.planets[planetId];
+    const planets = { ...state.value.planets, [planetId]: { ...existingStats, ...stats } };
     update({ planets });
   }
 
@@ -38,5 +49,6 @@ export const useStats = () => {
     state,
     addPlanet,
     incrementPlanetWins,
+    incrementPlanetKills,
   };
 };

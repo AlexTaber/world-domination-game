@@ -118,7 +118,7 @@ export const useGamePeer = (game: GameScene) => {
         }
 
         if (p.destroyed && !planet.destroyed) {
-          planet!.destroy();
+          game.destroyPlanet(planet);
         } else if (planet.destroyed && !p.destroyed) {
           planet.destroyed = p.destroyed;
         }

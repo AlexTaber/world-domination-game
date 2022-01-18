@@ -93,6 +93,16 @@ export class GameScene extends Phaser.Scene {
     return planet;
   }
 
+  public destroyPlanet(planet: Planet) {
+    if (this.gamePeer.isHost) {
+      if (planet.lastContact && this.time.now - planet.lastContact.time < 500) {
+        this.stats.incrementPlanetKills(planet.lastContact.id);
+      }
+    }
+
+    planet.destroy();
+  }
+
   public onGameOver(planetId: string) {
     this.setWinnerId(planetId);
     this.solarSystem.pauseShrink();
@@ -150,13 +160,22 @@ export class GameScene extends Phaser.Scene {
   }
 
   private setColliders() {
-    // this.physics.add.overlap(this.planets.map(p => p.object), this.solarSystem.sunObject, this.onSunCollide, undefined, this);
-    this.physics.add.collider(this.planets.map(p => p.object), this.planets.map(p => p.object));
+    this.physics.add.collider(
+      this.planets.map(p => p.object), this.planets.map(p => p.object),
+      this.onPlanetCollision,
+      undefined,
+      this
+    );
   }
 
-  private onSunCollide(planetObject: Phaser.GameObjects.GameObject) {
-    const planet = planetObject.getData("planet") as Planet;
-    this.planetsMarkedForDestruction.push(planet);
+  private onPlanetCollision(pObj1: Phaser.GameObjects.GameObject, pObj2: Phaser.GameObjects.GameObject) {
+    if (this.gamePeer.isHost) {
+      const p1 = pObj1.getData("planet") as Planet;
+      const p2 = pObj2.getData("planet") as Planet;
+      const time = this.time.now;
+      p1.lastContact = { id: p2.id, time };
+      p2.lastContact = { id: p1.id, time };
+    }
   }
 
   private updatePlanets() {
@@ -170,7 +189,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handleDestroyedPlanets() {
-    this.planetsMarkedForDestruction.forEach((p) => p.destroy());
+    this.planetsMarkedForDestruction.forEach((p) => this.destroyPlanet(p));
     this.planetsMarkedForDestruction = [];
     if (!this.winnerId) {
       this.handleGameOverIfOnePlanetLeft();
@@ -217,6 +236,8 @@ export class GameScene extends Phaser.Scene {
 
   private setWinnerId(winnerId: string) {
     this.winnerId = winnerId;
-    this.stats.incrementPlanetWins(winnerId);
+    if (this.gamePeer.isHost) {
+      this.stats.incrementPlanetWins(winnerId);
+    }
   }
 }

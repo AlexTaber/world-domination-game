@@ -6,7 +6,7 @@
       :key="planet.id"
       :class="{ destroyed: planet.destroyed, winner: planet.id === state.winner?.id }"
     >
-      <p>{{ getWins(planet) }} - {{ planet.name }}</p>
+      <p>{{ getScore(planet) }} - {{ planet.name }}</p>
       <p class="skull">&#128128;</p>
       <p class="destroyedText">Destroyed</p>
       <p class="winnerText">WINNER</p>
@@ -23,9 +23,9 @@ const { state } = usePublicGameState();
 
 const { state: stats } = useStats();
 
-const getWins = (planet: PublicPlanet) => stats.value.planets[planet.id]?.wins || 0;
+const getScore = (planet: PublicPlanet) => stats.value.planets[planet.id]?.score || 0;
 
-const orderedPlanets = computed(() => state.value.planets.sort((a, b) => stats.value.planets[a.id]!.wins > stats.value.planets[b.id]!.wins ? -1 : 1));
+const orderedPlanets = computed(() => state.value.planets.sort((a, b) => stats.value.planets[a.id]!.score > stats.value.planets[b.id]!.score ? -1 : 1));
 </script>
 
 <style scoped>
