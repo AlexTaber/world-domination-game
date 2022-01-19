@@ -219,9 +219,10 @@ export class GameScene extends Phaser.Scene {
   };
 
   private onHostGameOver(planet?: Planet) {
-    this.onGameOver(planet?.id);
+    const planetId = planet?.id || "tie";
+    this.onGameOver(planetId);
     this.planets.forEach((p) => p.object.setVelocity(0));
-    this.messageSender.sendGameOver(planet?.id);
+    this.messageSender.sendGameOver(planetId);
     this.newGameTimer = this.time.delayedCall(
       1200,
       () => this.planets.length > 1 ? this.hostStartNewGame() : this.close(),
