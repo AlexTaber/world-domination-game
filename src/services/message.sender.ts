@@ -22,7 +22,7 @@ export const useMessageSender = (game: GameScene) => {
 
   const sendUpdate = () => peerState.isHost ? sendHostUpdate() : sendGuestUpdate();
 
-  const sendGameOver = (planet: Planet) => send("gameOver", { winnerId: planet.id });
+  const sendGameOver = (planetId?: string) => send("gameOver", { winnerId: planetId });
 
   const sendHostUpdate = () => send("hostUpdate", getHostPayload());
 

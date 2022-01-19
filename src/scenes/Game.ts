@@ -103,7 +103,7 @@ export class GameScene extends Phaser.Scene {
     planet.destroy();
   }
 
-  public onGameOver(planetId: string) {
+  public onGameOver(planetId?: string) {
     this.setWinnerId(planetId);
     this.solarSystem.pauseShrink();
     this.planets.forEach(p => p.onGameOver());
@@ -213,15 +213,15 @@ export class GameScene extends Phaser.Scene {
 
   private handleGameOverIfOnePlanetLeft = () => {
     const remainingPlanets = this.planets.filter((p) => !p.destroyed);
-    if (remainingPlanets.length === 1) {
+    if (remainingPlanets.length <= 1) {
       this.onHostGameOver(remainingPlanets[0]);
     }
   };
 
-  private onHostGameOver(planet: Planet) {
-    this.onGameOver(planet.id);
+  private onHostGameOver(planet?: Planet) {
+    this.onGameOver(planet?.id);
     this.planets.forEach((p) => p.object.setVelocity(0));
-    this.messageSender.sendGameOver(planet);
+    this.messageSender.sendGameOver(planet?.id);
     this.newGameTimer = this.time.delayedCall(
       1200,
       () => this.planets.length > 1 ? this.hostStartNewGame() : this.close(),
@@ -234,9 +234,9 @@ export class GameScene extends Phaser.Scene {
     this.publicGameState.updateFromGame(this);
   }
 
-  private setWinnerId(winnerId: string) {
+  private setWinnerId(winnerId?: string) {
     this.winnerId = winnerId;
-    if (this.messageSender.isHost) {
+    if (this.messageSender.isHost && winnerId) {
       this.stats.incrementPlanetWins(winnerId);
     }
   }
